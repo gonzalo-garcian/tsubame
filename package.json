@@ -12,11 +12,13 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "firebase": "^9.17.1",
     "konva": "^8.4.2",
     "pinia": "^2.0.28",
     "vue": "^3.2.45",
     "vue-konva": "^3.0.2",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "vuefire": "^3.0.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
