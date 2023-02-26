@@ -12,8 +12,10 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "konva": "^8.4.2",
     "pinia": "^2.0.28",
     "vue": "^3.2.45",
+    "vue-konva": "^3.0.2",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
