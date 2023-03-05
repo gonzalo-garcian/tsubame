@@ -50,6 +50,12 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: "/sandbox",
+      name: "sandbox",
+
+      component: () => import("@/views/SandboxView.vue"),
+    },
   ],
 });
 
