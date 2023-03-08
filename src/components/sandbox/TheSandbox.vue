@@ -4,7 +4,7 @@ import { ref, onMounted } from "vue";
 const stage = ref();
 
 onMounted(() => {
-  stage.value.getStage().container().style.backgroundColor = "purple";
+  stage.value.getStage().container().style.backgroundColor = "white";
 });
 
 const width = window.innerWidth;
