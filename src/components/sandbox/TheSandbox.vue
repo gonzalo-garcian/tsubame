@@ -5,11 +5,17 @@ import topology from "@/stores/topology.json";
 const width = window.innerWidth;
 const height = window.innerHeight;
 
+window.addEventListener("resize", () => {
+  stageReference.value.getStage().setAttrs({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+});
+
 const stageReference = ref();
 const stageConfig = {
   width: width,
   height: height,
-  draggable: false,
 };
 
 const selectionRectangleReference = ref();
