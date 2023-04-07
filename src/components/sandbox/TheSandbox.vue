@@ -5,13 +5,6 @@ import topology from "@/stores/topology.json";
 const width = window.innerWidth;
 const height = window.innerHeight;
 
-window.addEventListener("resize", () => {
-  stageReference.value.getStage().setAttrs({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-});
-
 const stageReference = ref();
 const stageConfig = {
   width: width,
@@ -28,8 +21,12 @@ onMounted(() => {
   const stage = stageReference.value.getStage();
   const selectionRectangle = selectionRectangleReference.value.getStage();
 
-  //stage.container().style.backgroundColor = "white";
-  stage.setAttr("backgroundColor", "white");
+  window.addEventListener("resize", () => {
+    stageReference.value.getStage().setAttrs({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  });
 
   stage.on("contextmenu", (e) => {
     e.evt.preventDefault();
