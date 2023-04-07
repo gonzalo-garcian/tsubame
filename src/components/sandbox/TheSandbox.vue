@@ -1,53 +1,102 @@
 <script setup>
 import { ref, onMounted } from "vue";
-
-const stage = ref();
-
-onMounted(() => {
-  stage.value.getStage().container().style.backgroundColor = "white";
-});
+import topology from "@/stores/topology.json";
 
 const width = window.innerWidth;
 const height = window.innerHeight;
 
-const rectangles = [
-  {
-    rotation: 0,
-    x: 10,
-    y: 10,
-    width: 100,
-    height: 100,
-    scaleX: 1,
-    scaleY: 1,
-    fill: "red",
-    name: "rect1",
-    draggable: true,
-  },
-  {
-    rotation: 0,
-    x: 150,
-    y: 150,
-    width: 100,
-    height: 100,
-    scaleX: 1,
-    scaleY: 1,
-    fill: "green",
-    name: "rect2",
-    draggable: true,
-  },
-];
-
-const configKonva = {
+const stageReference = ref();
+const stageConfig = {
   width: width,
   height: height,
-  draggable: true,
+  draggable: false,
 };
+
+const selectionRectangleReference = ref();
+const selectionRectangleConfig = {
+  fill: "rgba(0,0,255,0.5)",
+  visible: false,
+};
+
+onMounted(() => {
+  const stage = stageReference.value.getStage();
+  const selectionRectangle = selectionRectangleReference.value.getStage();
+
+  //stage.container().style.backgroundColor = "white";
+  stage.setAttr("backgroundColor", "white");
+
+  stage.on("contextmenu", (e) => {
+    e.evt.preventDefault();
+  });
+
+  stage.on("mousedown", (e) => {
+    if (e.evt.button === 2 && e.target === stage) {
+      stage.startDrag();
+    }
+  });
+
+  stage.on("mouseup", (e) => {
+    if (e.evt.button === 2 && e.target === stage) {
+      stage.stopDrag();
+    }
+  });
+
+  let x1, y1, x2, y2;
+  stage.on("mousedown touchstart", (e) => {
+    // do nothing if we mousedown on any shape
+    if (e.target !== stage) {
+      return;
+    }
+    e.evt.preventDefault();
+    x1 = stage.getRelativePointerPosition().x;
+    y1 = stage.getRelativePointerPosition().y;
+    x2 = stage.getRelativePointerPosition().x;
+    y2 = stage.getRelativePointerPosition().y;
+
+    selectionRectangle.visible(true);
+    selectionRectangle.width(0);
+    selectionRectangle.height(0);
+  });
+
+  stage.on("mousemove touchmove", (e) => {
+    // do nothing if we didn't start selection
+    if (!selectionRectangle.visible()) {
+      return;
+    }
+    e.evt.preventDefault();
+    x2 = stage.getRelativePointerPosition().x;
+    y2 = stage.getRelativePointerPosition().y;
+
+    selectionRectangle.setAttrs({
+      x: Math.min(x1, x2),
+      y: Math.min(y1, y2),
+      width: Math.abs(x2 - x1),
+      height: Math.abs(y2 - y1),
+    });
+  });
+
+  stage.on("mouseup touchend", (e) => {
+    // do nothing if we didn't start selection
+    if (!selectionRectangle.visible()) {
+      return;
+    }
+    e.evt.preventDefault();
+    // update visibility in timeout, so we can check it in click event
+    setTimeout(() => {
+      selectionRectangle.visible(false);
+    });
+  });
+});
 </script>
 
 <template>
-  <v-stage ref="stage" :config="configKonva">
+  <v-stage ref="stageReference" :config="stageConfig">
     <v-layer ref="layer">
-      <v-rect v-for="item in rectangles" :key="item.id" :config="item" />
+      <v-rect v-for="node in topology" :key="node.id" :config="node" />
+      <v-rect
+        ref="selectionRectangleReference"
+        :config="selectionRectangleConfig"
+      />
     </v-layer>
   </v-stage>
 </template>
