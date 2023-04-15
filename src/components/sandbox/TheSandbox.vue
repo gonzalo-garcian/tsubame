@@ -10,6 +10,12 @@ const stageConfig = {
   width: width,
   height: height,
 };
+window.addEventListener("resize", () => {
+  stageReference.value.getStage().setAttrs({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+});
 
 const selectionRectangleReference = ref();
 const selectionRectangleConfig = {
@@ -20,13 +26,6 @@ const selectionRectangleConfig = {
 onMounted(() => {
   const stage = stageReference.value.getStage();
   const selectionRectangle = selectionRectangleReference.value.getStage();
-
-  window.addEventListener("resize", () => {
-    stageReference.value.getStage().setAttrs({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  });
 
   stage.on("contextmenu", (e) => {
     e.evt.preventDefault();
@@ -67,6 +66,8 @@ onMounted(() => {
       return;
     }
     e.evt.preventDefault();
+    const components = document.getElementById("components");
+    components.style.pointerEvents = "none";
     x2 = stage.getRelativePointerPosition().x;
     y2 = stage.getRelativePointerPosition().y;
 
@@ -87,18 +88,20 @@ onMounted(() => {
     // update visibility in timeout, so we can check it in click event
     setTimeout(() => {
       selectionRectangle.visible(false);
+      const elem = document.getElementById("components");
+      elem.style.pointerEvents = "none";
     });
   });
 
-  var scaleBy = 1.1;
+  let scaleBy = 1.1;
   stage.on("wheel", (e) => {
     // stop default scrolling
     e.evt.preventDefault();
 
-    var oldScale = stage.scaleX();
-    var pointer = stage.getPointerPosition();
+    let oldScale = stage.scaleX();
+    let pointer = stage.getPointerPosition();
 
-    var mousePointTo = {
+    let mousePointTo = {
       x: (pointer.x - stage.x()) / oldScale,
       y: (pointer.y - stage.y()) / oldScale,
     };
@@ -112,11 +115,11 @@ onMounted(() => {
       direction = -direction;
     }
 
-    var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    let newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
     stage.scale({ x: newScale, y: newScale });
 
-    var newPos = {
+    let newPos = {
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
     };
