@@ -9,7 +9,6 @@
   position: absolute;
   left: 20px;
   top: 100px;
-  z-index: 0;
   background: rgba(174, 223, 255, 0.5);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);

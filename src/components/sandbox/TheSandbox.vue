@@ -26,6 +26,7 @@ const selectionRectangleConfig = {
 onMounted(() => {
   const stage = stageReference.value.getStage();
   const selectionRectangle = selectionRectangleReference.value.getStage();
+  const components = document.getElementById("components");
 
   stage.on("contextmenu", (e) => {
     e.evt.preventDefault();
@@ -66,7 +67,6 @@ onMounted(() => {
       return;
     }
     e.evt.preventDefault();
-    const components = document.getElementById("components");
     components.style.pointerEvents = "none";
     x2 = stage.getRelativePointerPosition().x;
     y2 = stage.getRelativePointerPosition().y;
@@ -88,8 +88,7 @@ onMounted(() => {
     // update visibility in timeout, so we can check it in click event
     setTimeout(() => {
       selectionRectangle.visible(false);
-      const elem = document.getElementById("components");
-      elem.style.pointerEvents = "none";
+      components.style.pointerEvents = "auto";
     });
   });
 
