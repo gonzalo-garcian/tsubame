@@ -15,28 +15,7 @@ export class Stage {
 
     this.layer = new Konva.Layer();
     this.ref.add(this.layer);
-
-    var rect1 = new Konva.Rect({
-      x: 60,
-      y: 60,
-      width: 100,
-      height: 90,
-      fill: 'red',
-      name: 'rect',
-      draggable: true,
-    });
-    this.layer.add(rect1);
-
-    var rect2 = new Konva.Rect({
-      x: 250,
-      y: 100,
-      width: 150,
-      height: 90,
-      fill: 'green',
-      name: 'rect',
-      draggable: true,
-    });
-    this.layer.add(rect2);
+    topology.forEach((node) => this.layer.add(new Konva.Rect(node)));
 
     this.tr = new Konva.Transformer();
     this.layer.add(this.tr);
@@ -59,6 +38,8 @@ export class Stage {
     this.ref.on("mousemove touchmove", (e) => this.onMouseMove(e));
     this.ref.on("mouseup touchend", (e) => this.onMouseUp(e));
     this.ref.on("click tap", (e) => this.onClick(e));
+    this.ref.on("wheel", (e) => this.onWheel(e));
+    this.ref.on("contextmenu", (e) => e.evt.preventDefault());
   }
 
   onMouseDown(e) {
@@ -160,5 +141,37 @@ export class Stage {
       const nodes = this.tr.nodes().concat([e.target]);
       this.tr.nodes(nodes);
     }
+  }
+
+  onWheel(e) {
+    // stop default scrolling
+    e.evt.preventDefault();
+    let scaleBy = 1.1;
+    let oldScale = this.ref.scaleX();
+    let pointer = this.ref.getPointerPosition();
+
+    let mousePointTo = {
+      x: (pointer.x - this.ref.x()) / oldScale,
+      y: (pointer.y - this.ref.y()) / oldScale,
+    };
+
+    // how to scale? Zoom in? Or zoom out?
+    let direction = e.evt.deltaY > 0 ? -1 : 1;
+
+    // when we zoom on trackpad, e.evt.ctrlKey is true
+    // in that case lets revert direction
+    if (e.evt.ctrlKey) {
+      direction = -direction;
+    }
+
+    let newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+    this.ref.scale({ x: newScale, y: newScale });
+
+    let newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+    this.ref.position(newPos);
   }
 }

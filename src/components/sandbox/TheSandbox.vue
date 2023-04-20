@@ -3,7 +3,13 @@ import { onMounted } from "vue";
 import { Stage } from "@/composables/Stage";
 
 onMounted(() => {
-  new Stage("container");
+  let stage = new Stage("container");
+  window.addEventListener("resize", () => {
+    stage.ref.setAttrs({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  });
 });
 </script>
 

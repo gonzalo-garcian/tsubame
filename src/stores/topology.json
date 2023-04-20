@@ -8,7 +8,7 @@
     "scaleX": 1,
     "scaleY": 1,
     "fill": "red",
-    "name": "rect1",
+    "name": "rect",
     "draggable": true
   },
   {
@@ -20,7 +20,7 @@
     "scaleX": 1,
     "scaleY": 1,
     "fill": "green",
-    "name": "rect2",
+    "name": "rect",
     "draggable": true
   }
 ]
