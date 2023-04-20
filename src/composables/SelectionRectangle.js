@@ -18,7 +18,7 @@ export class SelectionRectangle {
   }
 
   mouseDown(e) {
-    console.log(this.stage);
+    console.log(this.selectionRectangle);
     // do nothing if we mousedown on any shape
     if (e.target !== this.stage.stage) {
       return;
