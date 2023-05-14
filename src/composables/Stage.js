@@ -2,15 +2,12 @@ import Konva from "konva";
 import topology from "@/stores/topology.json";
 
 export class Stage {
-  constructor(
-    container,
-    width = window.innerWidth,
-    height = window.innerHeight
-  ) {
+  constructor(container) {
+    const canvasContainer = document.querySelector(".canvas-container");
     this.ref = new Konva.Stage({
       container: container,
-      width: width,
-      height: height,
+      width: canvasContainer.offsetWidth,
+      height: canvasContainer.offsetHeight,
     });
 
     this.layer = new Konva.Layer();
@@ -22,7 +19,7 @@ export class Stage {
     this.tr.nodes(this.topology);
     // add a new feature, lets add ability to draw selection rectangle
     this.selectionRectangle = new Konva.Rect({
-      fill: "rgba(0,0,255,0.5)",
+      fill: "rgba(90,90,90,0.5)",
       visible: false,
     });
     this.layer.add(this.selectionRectangle);

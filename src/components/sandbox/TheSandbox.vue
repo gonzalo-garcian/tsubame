@@ -3,24 +3,26 @@ import { onMounted } from "vue";
 import { Stage } from "@/composables/Stage";
 
 onMounted(() => {
-  let stage = new Stage("container");
+  let stage = new Stage("canvas");
   window.addEventListener("resize", () => {
+    const canvasContainer = document.querySelector(".canvas-container");
     stage.ref.setAttrs({
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: canvasContainer.offsetWidth,
+      height: canvasContainer.offsetHeight,
     });
   });
 });
 </script>
 
 <template>
-  <div id="container"></div>
+  <div class="canvas-container">
+    <div id="canvas"></div>
+  </div>
 </template>
 
 <style>
-body {
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+.canvas-container {
+  grid-area: canvas-container;
+  background-color: #282828;
 }
 </style>
