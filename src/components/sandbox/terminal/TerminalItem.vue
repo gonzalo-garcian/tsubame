@@ -76,7 +76,15 @@ const executeCommand = () => {
     h2.addInterface(hi2);
     n2.addNodeInterface(hi2);
 
-    terminalLines.value.push(currentCommand.value + "\n");
+    let comandoEspecial =
+      "Tienes pelos en los huevos bro, estate quietecito con el pito no?";
+
+    let outputs = currentCommand.value + "\n";
+    if ((currentCommand.value = "pito")) {
+      outputs += comandoEspecial;
+    }
+
+    terminalLines.value.push(outputs);
 
     console.log(DFS.findPath(ni1, hi2));
     currentCommand.value = "";
