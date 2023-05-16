@@ -1,15 +1,37 @@
+import crypto from "crypto";
+import {IdGenerator} from "@/composables/IdGenerator";
+
 export class Network {
   constructor() {
-    this.subscribers = [];
+    this.id = new IdGenerator().generateId();
+    this.nodeInterfaces = [];
   }
 
-  subscribe(s) {
-    this.subscribers.push(s);
+  _generateId() {
+    const timestamp = Date.now().toString();
+    return crypto.createHash("sha256").update(timestamp).digest("hex");
   }
 
-  unsubscribe(s) {
-    this.subscribers = this.subscribers.filter((node) => node.ip !== s.ip);
+  /*getAllGateways() {
+    const nodeInterfaces = Object.entries(this.nodeInterfaces);
+    let gateways = [];
+
+    for (let [interfaceId, nodeRef] of nodeInterfaces) {
+      if (nodeRef.type === "router") {
+        gateways.push([interfaceId, nodeRef]);
+      }
+    }
+
+    return gateways;
+  }*/
+
+  addNodeInterface(interfaceRef) {
+    this.nodeInterfaces.push(interfaceRef);
   }
 
-  generateNode() {}
+  removeNodeInterface(interfaceId) {
+    delete this.nodeInterfaces.filter(
+      (interfaceRef) => interfaceRef.id !== interfaceId
+    );
+  }
 }

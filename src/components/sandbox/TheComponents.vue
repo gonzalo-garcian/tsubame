@@ -1,11 +1,11 @@
 <template>
-  <div class="sidebar"></div>
+  <div class="node-menu"></div>
 </template>
 
 <style>
-.sidebar {
-  grid-area: sidebar;
-  background-color: #f2f2f2;
-  //padding: 20px;
+.node-menu {
+    grid-area: node-menu;
+    background-color: #181818;
+//padding: 20px;
 }
 </style>

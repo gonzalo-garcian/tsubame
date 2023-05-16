@@ -1,5 +1,5 @@
 <script setup>
-import Project from "@/components/projects/Project.vue";
+import Project from "@/components/projects/ProjectItem.vue";
 
 defineProps({
   projects: Array,
