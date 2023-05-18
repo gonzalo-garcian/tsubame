@@ -1,5 +1,6 @@
 import Konva from "konva";
 import topology from "@/stores/topology.json";
+import { useNode } from "@/composables/useNode";
 
 export class Stage {
   constructor(container) {
@@ -14,7 +15,15 @@ export class Stage {
     this.ref.add(this.layer);
     topology.forEach((node) => this.layer.add(new Konva.Rect(node)));
 
-    this.tr = new Konva.Transformer();
+    useNode().createHost(this.ref, this.layer, 120, 30);
+    useNode().createHost(this.ref, this.layer, 500, 500);
+
+    this.tr = new Konva.Transformer({
+      rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
+      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
+      rotateEnabled: false,
+      //keepRatio: false,
+    });
     this.layer.add(this.tr);
     this.tr.nodes(this.topology);
     // add a new feature, lets add ability to draw selection rectangle

@@ -54,44 +54,9 @@ const clearTerminalOutput = () => {
 
 const executeCommand = () => {
   if (currentCommand.value.trim() !== "") {
-    let n1 = new Network();
-    let h1 = new NetworkNode("host");
-    let ni1 = new Interface(n1, h1);
-    h1.addInterface(ni1);
-    n1.addNodeInterface(ni1);
-    let r2 = new NetworkNode("router");
-    let r2i1 = new Interface(n1, r2);
-    r2.addInterface(r2i1);
-    n1.addNodeInterface(r2i1);
-    let r1 = new NetworkNode("router");
-    let ri1 = new Interface(n1, r1);
-    r1.addInterface(ri1);
-    n1.addNodeInterface(ri1);
-    let n2 = new Network();
-    let ri2 = new Interface(n2, r1);
-    r1.addInterface(ri2);
-    n2.addNodeInterface(ri2);
-    let h2 = new NetworkNode("host");
-    let hi2 = new Interface(n2, h2);
-    h2.addInterface(hi2);
-    n2.addNodeInterface(hi2);
-
-    let comandoEspecial =
-      "Tienes pelos en los huevos bro, estate quietecito con el pito no?";
-
-    let outputs = currentCommand.value + "\n";
-    if ((currentCommand.value = "pito")) {
-      outputs += comandoEspecial;
-    }
-
-    terminalLines.value.push(outputs);
-
-    console.log(DFS.findPath(ni1, hi2));
+    terminalLines.value.push(currentCommand.value + "\n");
     currentCommand.value = "";
     nextTick().then(() => scrollTerminalToBottom());
-    /*setTimeout(() => {
-      scrollTerminalToBottom();
-    }, 0);*/
   }
 };
 
