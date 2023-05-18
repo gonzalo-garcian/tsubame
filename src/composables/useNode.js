@@ -1,8 +1,35 @@
 import Konva from "konva";
 
 export function useNode() {
-  function createHost(stage, layer, x, y) {
-    const ANCHOR_OFFSET = 15;
+  function createHost(stage, layer, x, y, color, anchorColor = "white") {
+    const ANCHOR_OFFSET = 25;
+
+    function setEvents(eth) {
+      eth.on("mouseover", function () {
+        eth.fill("yellow");
+      });
+
+      eth.on("mouseleave", function () {
+        eth.fill(anchorColor);
+      });
+
+      let initialPosition;
+      eth.on("dragstart", function () {
+        initialPosition = eth.getPosition();
+      });
+
+      eth.on("dragmove", function () {
+        eth.position({
+          x: initialPosition.x,
+          y: initialPosition.y,
+        });
+      });
+
+      eth.on("dragend", function () {
+        console.log(stage.getPointerPosition().x);
+        console.log(stage.getPointerPosition().y);
+      });
+    }
 
     let host = new Konva.Rect({
       name: "rect",
@@ -10,7 +37,7 @@ export function useNode() {
       y: y,
       width: 100,
       height: 100,
-      fill: "red",
+      fill: color,
       draggable: true,
     });
     layer.add(host);
@@ -20,31 +47,11 @@ export function useNode() {
       y: host.y() + host.height() / 2,
       width: 10,
       height: 10,
-      fill: "white",
+      fill: anchorColor,
       draggable: true,
     });
 
-    eth0.on("mouseover", function () {
-      initialPosition = eth0.getPosition(); // Guardar la posición inicial del círculo
-    });
-
-    let initialPosition;
-    eth0.on("dragstart", function () {
-      initialPosition = eth0.getPosition();
-    });
-
-    eth0.on("dragmove", function () {
-      eth0.position({
-        x: initialPosition.x,
-        y: initialPosition.y,
-      });
-    });
-
-    eth0.on("dragend", function () {
-      console.log(stage.getPointerPosition().x);
-      console.log(stage.getPointerPosition().y);
-    });
-
+    setEvents(eth0);
     layer.add(eth0);
 
     let eth1 = new Konva.Circle({
@@ -52,9 +59,11 @@ export function useNode() {
       y: host.y() + host.height() + ANCHOR_OFFSET,
       width: 10,
       height: 10,
-      fill: "white",
+      fill: anchorColor,
+      draggable: true,
     });
 
+    setEvents(eth1);
     layer.add(eth1);
 
     let eth2 = new Konva.Circle({
@@ -62,9 +71,11 @@ export function useNode() {
       y: host.y() + host.height() / 2,
       width: 10,
       height: 10,
-      fill: "white",
+      fill: anchorColor,
+      draggable: true,
     });
 
+    setEvents(eth2);
     layer.add(eth2);
 
     let eth3 = new Konva.Circle({
@@ -72,9 +83,11 @@ export function useNode() {
       y: host.y() - ANCHOR_OFFSET,
       width: 10,
       height: 10,
-      fill: "white",
+      fill: anchorColor,
+      draggable: true,
     });
 
+    setEvents(eth3);
     layer.add(eth3);
 
     function recalculateAnchorPosition() {
@@ -110,10 +123,10 @@ export function useNode() {
     host.on("transform", function () {
       let scaleX = host.scaleX();
 
-      eth0.radius(Math.abs(3 * scaleX));
-      eth1.radius(Math.abs(3 * scaleX));
-      eth2.radius(Math.abs(3 * scaleX));
-      eth3.radius(Math.abs(3 * scaleX));
+      eth0.radius(Math.abs(5 * scaleX));
+      eth1.radius(Math.abs(5 * scaleX));
+      eth2.radius(Math.abs(5 * scaleX));
+      eth3.radius(Math.abs(5 * scaleX));
 
       recalculateAnchorPosition();
 
@@ -123,6 +136,10 @@ export function useNode() {
     host.on("dragmove", function () {
       recalculateAnchorPosition();
       layer.batchDraw();
+    });
+
+    host.on("dragmove", function () {
+
     });
   }
 

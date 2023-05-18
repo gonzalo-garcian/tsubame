@@ -13,10 +13,9 @@ export class Stage {
 
     this.layer = new Konva.Layer();
     this.ref.add(this.layer);
-    topology.forEach((node) => this.layer.add(new Konva.Rect(node)));
 
-    useNode().createHost(this.ref, this.layer, 120, 30);
-    useNode().createHost(this.ref, this.layer, 500, 500);
+    useNode().createHost(this.ref, this.layer, 120, 30, "red");
+    useNode().createHost(this.ref, this.layer, 500, 500, "green");
 
     this.tr = new Konva.Transformer({
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
@@ -25,8 +24,7 @@ export class Stage {
       //keepRatio: false,
     });
     this.layer.add(this.tr);
-    this.tr.nodes(this.topology);
-    // add a new feature, lets add ability to draw selection rectangle
+
     this.selectionRectangle = new Konva.Rect({
       fill: "rgba(90,90,90,0.5)",
       visible: false,
