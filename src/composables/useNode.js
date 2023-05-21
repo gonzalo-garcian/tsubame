@@ -17,12 +17,45 @@ export function useNode() {
     selectedAnchorColor = "green"
   ) {
     /* CONSTANTS */
-    const ANCHOR_OFFSET = 25;
+    const ANCHOR_OFFSET = 15;
     const ANCHOR_SIZE = 10;
 
     function setEvents(eth, ethL) {
+      eth.on("click", function (e) {
+        if (e.evt.button === 2 && topology.connectionExists({ from: eth })) {
+          console.log("remove");
+          console.log(topology.connections);
+          let connectionToRemove = null;
+
+          topology.connections.forEach((connection) => {
+            if (connection.from._id === eth._id) {
+              connectionToRemove = connection;
+            }
+          });
+          if (connectionToRemove === null) {
+            return;
+          }
+
+          connectionToRemove.instanceEth.network = null;
+
+          connectionToRemove.networkInstance.removeNodeInterface(
+            connectionToRemove.instanceEth.mediaAccessControlAddress
+          );
+
+          connectionToRemove.line.remove();
+          console.log("userNode elem to rm: " + connectionToRemove.from._id);
+          topology.removeConnection(connectionToRemove.from._id);
+
+          console.log(topology.connections);
+        }
+      });
+
       eth.on("mouseover", function () {
-        eth.fill(selectedAnchorColor);
+        if (topology.connectionExists({ from: eth })) {
+          eth.fill("red");
+        } else {
+          eth.fill(selectedAnchorColor);
+        }
       });
 
       eth.on("mouseleave", function () {
@@ -69,13 +102,21 @@ export function useNode() {
               to: networkConnected.shapeNetwork,
             })
           ) {
+            console.log("No llega!");
             return;
           }
 
           ethL.network = networkConnected.instanceNetwork;
           networkConnected.instanceNetwork.addNodeInterface(ethL);
           layer.add(connectionLine);
-          topology.addConnection(eth, ethL, intersectedObj, connectionLine);
+          topology.addConnection(
+            eth,
+            ethL,
+            intersectedObj,
+            networkConnected.instanceNetwork,
+            connectionLine
+          );
+          console.log("Conexiones: ");
           console.log(topology.connections);
         }
       });

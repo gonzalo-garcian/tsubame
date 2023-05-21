@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import {IdGenerator} from "@/models/IdGenerator";
+import { IdGenerator } from "@/models/IdGenerator";
 
 export class Network {
   constructor() {
@@ -30,8 +30,12 @@ export class Network {
   }
 
   removeNodeInterface(interfaceId) {
-    delete this.nodeInterfaces.filter(
-      (interfaceRef) => interfaceRef.id !== interfaceId
-    );
+    let index = this.nodeInterfaces.findIndex(function (nodeInterface) {
+      return nodeInterface.mediaAccessControlAddress === interfaceId;
+    });
+
+    if (index !== -1) {
+      this.nodeInterfaces.splice(index, 1);
+    }
   }
 }

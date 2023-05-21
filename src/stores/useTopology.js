@@ -24,11 +24,18 @@ export let useTopologyStore = defineStore("topology", {
     };
   },
   actions: {
-    addConnection(shapeEth, instanceEth, connectedNetwork, line) {
+    addConnection(
+      shapeEth,
+      instanceEth,
+      connectedNetwork,
+      networkInstance,
+      line
+    ) {
       this.connections.push({
         from: shapeEth,
-        to: connectedNetwork,
         instanceEth: instanceEth,
+        to: connectedNetwork,
+        networkInstance: networkInstance,
         line: line,
       });
     },
@@ -56,6 +63,13 @@ export let useTopologyStore = defineStore("topology", {
         }
       });
       return exists;
+    },
+    removeConnection(fromId){
+      console.log(this.connections);
+      this.connections = this.connections.filter(function(connection) {
+        console.log(connection);
+        return connection.from._id !== fromId;
+      });
     },
   },
 });
