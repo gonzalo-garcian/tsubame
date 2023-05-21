@@ -16,11 +16,12 @@ export class Stage {
 
     useNode().createHost(this.ref, this.layer, 120, 30, "red");
     useNode().createHost(this.ref, this.layer, 500, 500, "green");
-    useNode().createNetwork(this.ref, this.layer);
+    useNode().createNetwork(this.ref, this.layer, 500, 100, "red");
+    useNode().createNetwork(this.ref, this.layer, 700, 100, "yellow");
 
     this.tr = new Konva.Transformer({
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
-      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
+      enabledAnchors: [],
       rotateEnabled: false,
       //keepRatio: false,
     });

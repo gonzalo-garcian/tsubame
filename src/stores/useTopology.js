@@ -51,14 +51,10 @@ export let useTopologyStore = defineStore("topology", {
     connectionExists(newConnection) {
       let exists = false;
       this.connections.forEach((connection) => {
-        if (
-          newConnection.from._id === connection.from._id &&
-          newConnection.to._id === connection.to._id
-        ) {
+        if (newConnection.from._id === connection.from._id) {
           exists = true;
         }
       });
-
       return exists;
     },
   },

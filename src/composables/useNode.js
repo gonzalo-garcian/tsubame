@@ -234,14 +234,14 @@ export function useNode() {
     });
   }
 
-  function createNetwork(stage, layer) {
+  function createNetwork(stage, layer, x, y, color) {
     let network = new Konva.Circle({
       name: "network",
-      x: 100,
-      y: 100,
-      width: 120,
-      height: 120,
-      fill: "blue",
+      x: x,
+      y: y,
+      width: 110,
+      height: 110,
+      fill: color,
       draggable: true,
     });
     let networkL = new Network();
