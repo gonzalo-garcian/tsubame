@@ -16,6 +16,7 @@ export class Stage {
 
     useNode().createHost(this.ref, this.layer, 120, 30, "red");
     useNode().createHost(this.ref, this.layer, 500, 500, "green");
+    useNode().createNetwork(this.ref, this.layer);
 
     this.tr = new Konva.Transformer({
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
@@ -44,6 +45,7 @@ export class Stage {
     this.ref.on("click tap", (e) => this.onClick(e));
     this.ref.on("wheel", (e) => this.onWheel(e));
     this.ref.on("contextmenu", (e) => e.evt.preventDefault());
+    this.ref.on("dragend", (e) => this.onDragEnd(e));
   }
 
   onMouseDown(e) {
@@ -55,6 +57,7 @@ export class Stage {
 
     if (e.evt.button === 2) {
       this.ref.startDrag();
+      this.ref.container().style.cursor = "move";
     }
 
     this.position.x1 = this.ref.getRelativePointerPosition().x;
@@ -177,5 +180,9 @@ export class Stage {
       y: pointer.y - mousePointTo.y * newScale,
     };
     this.ref.position(newPos);
+  }
+
+  onDragEnd(e) {
+    this.ref.container().style.cursor = "default";
   }
 }

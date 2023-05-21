@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import {IdGenerator} from "@/composables/IdGenerator";
+import {IdGenerator} from "@/models/IdGenerator";
 
 export class Network {
   constructor() {

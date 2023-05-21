@@ -1,8 +1,8 @@
 import crypto from "crypto";
-import {IdGenerator} from "@/composables/IdGenerator";
+import { IdGenerator } from "@/models/IdGenerator";
 
 export class Interface {
-  constructor(network, father) {
+  constructor(network = null, father) {
     this.internetProtocolAddress = "0.0.0.0";
     this.mediaAccessControlAddress = new IdGenerator().generateId();
     this.network = network;

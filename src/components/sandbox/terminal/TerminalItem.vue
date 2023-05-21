@@ -26,10 +26,10 @@
 
 <script setup>
 import { nextTick, onMounted, ref } from "vue";
-import { DepthFirstSearch } from "@/composables/DepthFirstSearch";
-import { Network } from "@/composables/Network";
-import { Interface } from "@/composables/Interface";
-import { NetworkNode } from "@/composables/NetworkNode";
+import { DepthFirstSearch } from "@/models/DepthFirstSearch";
+import { Network } from "@/models/Network";
+import { Interface } from "@/models/Interface";
+import { NetworkNode } from "@/models/NetworkNode";
 
 const currentCommand = ref("");
 const terminalLines = ref([]);

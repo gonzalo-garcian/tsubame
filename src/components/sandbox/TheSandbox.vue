@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from "vue";
-import { Stage } from "@/composables/Stage";
+import { Stage } from "@/models/Stage";
 
 onMounted(() => {
   let stage = new Stage("canvas");
