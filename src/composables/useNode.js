@@ -64,11 +64,9 @@ export function useNode() {
           });
 
           if (
-            topology.connections.includes({
-              eth,
-              ethL,
-              intersectedObj,
-              connectionLine,
+            topology.connectionExists({
+              from: eth,
+              to: networkConnected.shapeNetwork,
             })
           ) {
             return;

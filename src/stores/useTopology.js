@@ -48,15 +48,18 @@ export let useTopologyStore = defineStore("topology", {
         );
       });
     },
-    connectionExists() {
+    connectionExists(newConnection) {
+      let exists = false;
       this.connections.forEach((connection) => {
-        connection.line.points(
-          getConnectorPoints(
-            connection.from.position(),
-            connection.to.position()
-          )
-        );
+        if (
+          newConnection.from._id === connection.from._id &&
+          newConnection.to._id === connection.to._id
+        ) {
+          exists = true;
+        }
       });
+
+      return exists;
     },
   },
 });
