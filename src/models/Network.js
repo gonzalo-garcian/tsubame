@@ -30,12 +30,10 @@ export class Network {
   }
 
   removeNodeInterface(interfaceId) {
-    let index = this.nodeInterfaces.findIndex(function (nodeInterface) {
-      return nodeInterface.mediaAccessControlAddress === interfaceId;
+    console.log(this.nodeInterfaces);
+    this.nodeInterfaces = this.nodeInterfaces.filter(function(nodeInterface) {
+      console.log(nodeInterface);
+      return nodeInterface.mediaAccessControlAddress !== interfaceId;
     });
-
-    if (index !== -1) {
-      this.nodeInterfaces.splice(index, 1);
-    }
   }
 }
