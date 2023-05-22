@@ -98,8 +98,8 @@ export function useNode() {
         });
 
         tempAnchor.setAttrs({
-          x: stage.getPointerPosition().x,
-          y: stage.getPointerPosition().y,
+          x: stage.getRelativePointerPosition().x,
+          y: stage.getRelativePointerPosition().y,
         });
 
         tempConnectionLine.setAttrs({
@@ -114,7 +114,7 @@ export function useNode() {
       });
 
       eth.on("dragend", function () {
-        let pointerPos = stage.getRelativePointerPosition();
+        let pointerPos = stage.getPointerPosition();
         let intersectedObj = stage.getIntersection(pointerPos);
 
         tempAnchor.visible(false);
