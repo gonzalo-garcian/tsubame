@@ -18,9 +18,35 @@ export function useNode() {
   ) {
     /* CONSTANTS */
     const ANCHOR_OFFSET = 15;
-    const ANCHOR_SIZE = 10;
+    const ANCHOR_SIZE = 15;
 
+    let tempConnectionLine = new Konva.Line({
+      stroke: "white",
+      strokeWidth: 5,
+      lineCap: "round",
+      lineJoin: "round",
+      visible: false,
+    });
+
+    let tempAnchor = new Konva.Circle({
+      name: "anchor",
+      width: ANCHOR_SIZE,
+      height: ANCHOR_SIZE,
+      fill: "white",
+      visible: false,
+    });
+
+    layer.add(tempConnectionLine);
+    layer.add(tempAnchor);
     function setEvents(eth, ethL) {
+      eth.on("mouseover", function () {
+        stage.container().style.cursor = "grab";
+      });
+
+      eth.on("mouseout", function () {
+        stage.container().style.cursor = "default";
+      });
+
       eth.on("click", function (e) {
         if (e.evt.button === 2 && topology.connectionExists({ from: eth })) {
           console.log("remove");
@@ -68,15 +94,39 @@ export function useNode() {
       });
 
       eth.on("dragmove", function () {
+        stage.container().style.cursor = "grabbing";
+
         eth.position({
           x: initialPosition.x,
           y: initialPosition.y,
+        });
+
+        tempAnchor.setAttrs({
+          x: stage.getPointerPosition().x,
+          y: stage.getPointerPosition().y,
+        });
+
+        console.log(
+          topology.getConnectorPoints(tempAnchor.position(), eth.position())
+        );
+
+        tempConnectionLine.setAttrs({
+          points: topology.getConnectorPoints(
+            eth.position(),
+            tempAnchor.position(),
+            20,
+            0
+          ),
+          visible: true,
         });
       });
 
       eth.on("dragend", function () {
         let pointerPos = stage.getPointerPosition();
         let intersectedObj = stage.getIntersection(pointerPos);
+
+        tempAnchor.visible(false);
+        tempConnectionLine.visible(false);
 
         if (intersectedObj && intersectedObj.attrs.name === "network") {
           console.log("Objeto intersectado:", intersectedObj);
@@ -86,7 +136,7 @@ export function useNode() {
           });
 
           let connectionLine = new Konva.Line({
-            points: getConnectorPoints(
+            points: topology.getConnectorPoints(
               eth.position(),
               networkConnected.shapeNetwork.position()
             ),
@@ -120,22 +170,6 @@ export function useNode() {
           console.log(topology.connections);
         }
       });
-    }
-
-    function getConnectorPoints(from, to) {
-      const dx = to.x - from.x;
-      const dy = to.y - from.y;
-      let angle = Math.atan2(-dy, dx);
-
-      const FromRadius = 20;
-      const ToRadius = 80;
-
-      return [
-        from.x + -FromRadius * Math.cos(angle + Math.PI),
-        from.y + FromRadius * Math.sin(angle + Math.PI),
-        to.x + -ToRadius * Math.cos(angle),
-        to.y + ToRadius * Math.sin(angle),
-      ];
     }
 
     let host = new Konva.Rect({
@@ -294,6 +328,14 @@ export function useNode() {
       stage.container().style.cursor = "grabbing";
       topology.updateConnections();
       layer.batchDraw();
+    });
+
+    network.on("mouseover", function () {
+      stage.container().style.cursor = "grab";
+    });
+
+    network.on("mouseout", function () {
+      stage.container().style.cursor = "default";
     });
   }
 

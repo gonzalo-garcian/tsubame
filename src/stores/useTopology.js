@@ -1,20 +1,5 @@
 import { defineStore } from "pinia";
 
-function getConnectorPoints(from, to) {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  let angle = Math.atan2(-dy, dx);
-
-  const FromRadius = 20;
-  const ToRadius = 80;
-
-  return [
-    from.x + -FromRadius * Math.cos(angle + Math.PI),
-    from.y + FromRadius * Math.sin(angle + Math.PI),
-    to.x + -ToRadius * Math.cos(angle),
-    to.y + ToRadius * Math.sin(angle),
-  ];
-}
 export let useTopologyStore = defineStore("topology", {
   state() {
     return {
@@ -48,7 +33,7 @@ export let useTopologyStore = defineStore("topology", {
     updateConnections() {
       this.connections.forEach((connection) => {
         connection.line.points(
-          getConnectorPoints(
+          this.getConnectorPoints(
             connection.from.position(),
             connection.to.position()
           )
@@ -64,12 +49,24 @@ export let useTopologyStore = defineStore("topology", {
       });
       return exists;
     },
-    removeConnection(fromId){
+    removeConnection(fromId) {
       console.log(this.connections);
-      this.connections = this.connections.filter(function(connection) {
+      this.connections = this.connections.filter(function (connection) {
         console.log(connection);
         return connection.from._id !== fromId;
       });
+    },
+    getConnectorPoints(from, to, FromRadius = 20, ToRadius = 80) {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      let angle = Math.atan2(-dy, dx);
+
+      return [
+        from.x + -FromRadius * Math.cos(angle + Math.PI),
+        from.y + FromRadius * Math.sin(angle + Math.PI),
+        to.x + -ToRadius * Math.cos(angle),
+        to.y + ToRadius * Math.sin(angle),
+      ];
     },
   },
 });
