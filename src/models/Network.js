@@ -30,9 +30,9 @@ export class Network {
   }
 
   removeNodeInterface(interfaceId) {
-    console.log(this.nodeInterfaces);
+    
     this.nodeInterfaces = this.nodeInterfaces.filter(function(nodeInterface) {
-      console.log(nodeInterface);
+      
       return nodeInterface.mediaAccessControlAddress !== interfaceId;
     });
   }

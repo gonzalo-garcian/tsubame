@@ -50,9 +50,7 @@ export let useTopologyStore = defineStore("topology", {
       return exists;
     },
     removeConnection(fromId) {
-      console.log(this.connections);
       this.connections = this.connections.filter(function (connection) {
-        console.log(connection);
         return connection.from._id !== fromId;
       });
     },

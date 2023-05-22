@@ -1,6 +1,6 @@
 <script setup>
 import TheSandbox from "@/components/sandbox/TheSandbox.vue";
-import TheComponents from "@/components/sandbox/TheComponents.vue";
+import TheComponents from "@/components/sandbox/nodes/TheNodes.vue";
 import TheTerminal from "@/components/sandbox/terminal/TerminalItem.vue";
 </script>
 

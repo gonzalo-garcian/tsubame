@@ -19,28 +19,19 @@ export class DepthFirstSearch {
         currentNodeInterface.mediaAccessControlAddress ===
         targetNode.mediaAccessControlAddress
       ) {
-        console.log(currentPath);
         return currentPath.concat(currentNodeInterface);
       }
 
       if (!visited.has(currentNodeInterface)) {
         visited.add(currentNodeInterface);
-        console.log("Nodo visitado: ");
-        console.log(currentNodeInterface.mediaAccessControlAddress);
-        console.log("Nodos adyacentes al nodo visitado: ");
-        console.log(currentNodeInterface.network.nodeInterfaces);
+
         for (const gateway of currentNodeInterface.network.nodeInterfaces) {
-          console.log(gateway.mediaAccessControlAddress);
           if (
             !visited.has(gateway) &&
             (gateway.father.type === "router" ||
               gateway.mediaAccessControlAddress ===
                 targetNode.mediaAccessControlAddress)
           ) {
-            console.log(
-              "Nodo gateway encontrado: " + gateway.mediaAccessControlAddress
-            );
-
             if (
               gateway.mediaAccessControlAddress ===
               targetNode.mediaAccessControlAddress
@@ -53,16 +44,12 @@ export class DepthFirstSearch {
             for (const gatewayInterface of gateway.father.interfaces.filter(
               (gatewayInterface) => gatewayInterface !== gateway
             )) {
-              console.log("La interfaz saliente encontrada:");
-              console.log(gatewayInterface.mediaAccessControlAddress);
               stack.push([
                 gatewayInterface,
                 currentPath.concat(currentNodeInterface, gateway),
               ]);
-              console.log("Este es el stack en este momento: ");
+
               for (const eth of stack) {
-                console.log(eth[0]);
-                console.log(eth[1]);
               }
             }
           }

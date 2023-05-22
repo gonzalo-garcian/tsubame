@@ -49,8 +49,6 @@ export function useNode() {
 
       eth.on("click", function (e) {
         if (e.evt.button === 2 && topology.connectionExists({ from: eth })) {
-          console.log("remove");
-          console.log(topology.connections);
           let connectionToRemove = null;
 
           topology.connections.forEach((connection) => {
@@ -69,10 +67,8 @@ export function useNode() {
           );
 
           connectionToRemove.line.remove();
-          console.log("userNode elem to rm: " + connectionToRemove.from._id);
-          topology.removeConnection(connectionToRemove.from._id);
 
-          console.log(topology.connections);
+          topology.removeConnection(connectionToRemove.from._id);
         }
       });
 
@@ -106,10 +102,6 @@ export function useNode() {
           y: stage.getPointerPosition().y,
         });
 
-        console.log(
-          topology.getConnectorPoints(tempAnchor.position(), eth.position())
-        );
-
         tempConnectionLine.setAttrs({
           points: topology.getConnectorPoints(
             eth.position(),
@@ -122,15 +114,13 @@ export function useNode() {
       });
 
       eth.on("dragend", function () {
-        let pointerPos = stage.getPointerPosition();
+        let pointerPos = stage.getRelativePointerPosition();
         let intersectedObj = stage.getIntersection(pointerPos);
 
         tempAnchor.visible(false);
         tempConnectionLine.visible(false);
 
         if (intersectedObj && intersectedObj.attrs.name === "network") {
-          console.log("Objeto intersectado:", intersectedObj);
-          console.log(intersectedObj._id);
           let networkConnected = topology.networks.find(function (network) {
             return network.shapeNetwork._id === intersectedObj._id;
           });
@@ -152,7 +142,6 @@ export function useNode() {
               to: networkConnected.shapeNetwork,
             })
           ) {
-            console.log("No llega!");
             return;
           }
 
@@ -166,8 +155,6 @@ export function useNode() {
             networkConnected.instanceNetwork,
             connectionLine
           );
-          console.log("Conexiones: ");
-          console.log(topology.connections);
         }
       });
     }
@@ -184,7 +171,7 @@ export function useNode() {
     });
     let hostL = new NetworkNode("host");
     topology.addNode(host, hostL);
-    console.log(topology.nodes);
+
     layer.add(host);
 
     let eth0 = new Konva.Circle({
@@ -296,7 +283,7 @@ export function useNode() {
 
     host.on("dragend", function () {
       host.fire("mouseover");
-      console.log(stage.container().style.cursor);
+
       layer.batchDraw();
     });
 
@@ -322,7 +309,6 @@ export function useNode() {
     let networkL = new Network();
     topology.addNetwork(network, networkL);
     layer.add(network);
-    console.log(topology.networks);
 
     network.on("dragmove", function () {
       stage.container().style.cursor = "grabbing";
