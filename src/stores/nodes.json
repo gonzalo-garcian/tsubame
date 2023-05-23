@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Network",
+    "img": "src/assets/network-node.png",
+    "alt": "Circle that represents a network node."
+  },
+  {
+    "id": 2,
+    "name": "Host",
+    "img": "src/assets/host-node.png",
+    "alt": "Square that represents a host."
+  },
+  {
+    "id": 3,
+    "name": "Router",
+    "img": "src/assets/router-node.png",
+    "alt": "Square that represents a router."
+  }
+]
