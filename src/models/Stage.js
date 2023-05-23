@@ -40,6 +40,8 @@ export class Stage {
       y2: 0,
     };
 
+    this.con = this.ref.container();
+
     this.ref.on("mousedown touchstart", (e) => this.onMouseDown(e));
     this.ref.on("mousemove touchmove", (e) => this.onMouseMove(e));
     this.ref.on("mouseup touchend", (e) => this.onMouseUp(e));
@@ -47,6 +49,7 @@ export class Stage {
     this.ref.on("wheel", (e) => this.onWheel(e));
     this.ref.on("contextmenu", (e) => e.evt.preventDefault());
     this.ref.on("dragend", (e) => this.onDragEnd(e));
+    this.con.on("ondragover", () => this.onDragOver(event));
   }
 
   onMouseDown(e) {
@@ -183,7 +186,12 @@ export class Stage {
     this.ref.position(newPos);
   }
 
-  onDragEnd(e) {
+  onDragEnd() {
     this.ref.container().style.cursor = "default";
+  }
+
+  onDragOver(e) {
+    e.preventDefault();
+    console.log("Hola");
   }
 }

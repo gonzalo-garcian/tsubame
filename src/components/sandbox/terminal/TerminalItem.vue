@@ -75,14 +75,18 @@ onMounted(() => {
   background-color: #303030;
   color: white;
   font-family: monospace;
-  font-size: 14px;
   padding: 10px;
   grid-area: terminal;
+}
+
+.terminal-header{
+  font-size: 16px;
 }
 
 .terminal-body {
   height: 150px;
   overflow-y: auto;
+  font-size: 14px;
 }
 
 .terminal-line {

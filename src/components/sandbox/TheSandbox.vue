@@ -1,4 +1,5 @@
 <script setup>
+
 import { onMounted } from "vue";
 import { Stage } from "@/models/Stage";
 
