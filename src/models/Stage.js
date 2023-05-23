@@ -40,7 +40,24 @@ export class Stage {
       y2: 0,
     };
 
-    this.con = this.ref.container();
+    let con = this.ref.container();
+    con.addEventListener("dragover", (e) => {
+      e.preventDefault(); // !important
+    });
+
+    con.addEventListener("drop", (e) => {
+      e.preventDefault();
+      console.log(this.ref);
+      this.ref.setPointersPositions(e);
+      let pointer = this.ref.getPointerPosition();
+      console.log(pointer);
+      useNode().createHost(
+        this.ref,
+        this.layer,
+        pointer.x,
+        pointer.y
+      );
+    });
 
     this.ref.on("mousedown touchstart", (e) => this.onMouseDown(e));
     this.ref.on("mousemove touchmove", (e) => this.onMouseMove(e));
@@ -49,7 +66,6 @@ export class Stage {
     this.ref.on("wheel", (e) => this.onWheel(e));
     this.ref.on("contextmenu", (e) => e.evt.preventDefault());
     this.ref.on("dragend", (e) => this.onDragEnd(e));
-    this.con.on("ondragover", () => this.onDragOver(event));
   }
 
   onMouseDown(e) {
@@ -188,10 +204,5 @@ export class Stage {
 
   onDragEnd() {
     this.ref.container().style.cursor = "default";
-  }
-
-  onDragOver(e) {
-    e.preventDefault();
-    console.log("Hola");
   }
 }

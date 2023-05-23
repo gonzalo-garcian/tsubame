@@ -12,7 +12,7 @@ export function useNode() {
     layer,
     x,
     y,
-    color,
+    color = "red",
     anchorColor = "white",
     selectedAnchorColor = "green"
   ) {
