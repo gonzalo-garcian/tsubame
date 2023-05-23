@@ -3,9 +3,10 @@ defineProps({
   node: Object,
 });
 
-function drag(e){
+const drag = (e) => {
   e.preventDefault();
-}
+  document.body.style.cursor = "grabbing";
+};
 </script>
 
 <template>
@@ -33,5 +34,6 @@ function drag(e){
 
 .node-item:hover {
   box-shadow: 0 8px 16px 0 green;
+  cursor: grab;
 }
 </style>

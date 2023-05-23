@@ -1,5 +1,4 @@
 import Konva from "konva";
-import topology from "@/stores/topology.json";
 import { useNode } from "@/composables/useNode";
 
 export class Stage {
@@ -18,6 +17,7 @@ export class Stage {
     useNode().createHost(this.ref, this.layer, 500, 500, "green");
     useNode().createNetwork(this.ref, this.layer, 500, 100, "red");
     useNode().createNetwork(this.ref, this.layer, 700, 100, "yellow");
+    useNode().createHost(this.ref, this.layer, 500, 500, "green");
 
     this.tr = new Konva.Transformer({
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
@@ -123,7 +123,9 @@ export class Stage {
       this.selectionRectangle.visible(false);
     });
 
-    let shapes = this.ref.find(".rect");
+
+    let shapes = this.ref.find('.rect');
+    shapes = shapes.concat(this.ref.find('.network'));
     let box = this.selectionRectangle.getClientRect();
     let selected = shapes.filter((shape) =>
       Konva.Util.haveIntersection(box, shape.getClientRect())
@@ -144,7 +146,7 @@ export class Stage {
     }
 
     // do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName("rect")) {
+    if (!e.target.hasName("rect") && !e.target.hasName("network")) {
       return;
     }
 

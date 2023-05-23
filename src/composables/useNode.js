@@ -38,6 +38,8 @@ export function useNode() {
 
     layer.add(tempConnectionLine);
     layer.add(tempAnchor);
+
+    tempConnectionLine.setZIndex(0);
     function setEvents(eth, ethL) {
       eth.on("mouseover", function () {
         stage.container().style.cursor = "grab";
@@ -116,6 +118,8 @@ export function useNode() {
       eth.on("dragend", function () {
         let pointerPos = stage.getPointerPosition();
         let intersectedObj = stage.getIntersection(pointerPos);
+
+        console.log(intersectedObj);
 
         tempAnchor.visible(false);
         tempConnectionLine.visible(false);
