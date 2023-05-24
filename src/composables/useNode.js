@@ -14,7 +14,8 @@ export function useNode() {
     y,
     color = "red",
     anchorColor = "white",
-    selectedAnchorColor = "green"
+    selectedAnchorColor = "green",
+    ntype = "host"
   ) {
     /* CONSTANTS */
     const ANCHOR_OFFSET = 15;
@@ -173,10 +174,10 @@ export function useNode() {
       fill: color,
       draggable: true,
     });
-    let hostL = new NetworkNode("host");
+    let hostL = new NetworkNode(ntype.toLowerCase());
     topology.addNode(host, hostL);
-
     layer.add(host);
+    console.log(topology.nodes);
 
     let eth0 = new Konva.Circle({
       name: "anchor",
@@ -300,7 +301,7 @@ export function useNode() {
     });
   }
 
-  function createNetwork(stage, layer, x, y, color) {
+  function createNetwork(stage, layer, x, y, color = "yellow") {
     let network = new Konva.Circle({
       name: "network",
       x: x,

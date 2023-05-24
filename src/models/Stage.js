@@ -1,5 +1,8 @@
 import Konva from "konva";
 import { useNode } from "@/composables/useNode";
+import { useTopologyStore } from "@/stores/useTopology";
+
+let topology = useTopologyStore();
 
 export class Stage {
   constructor(container) {
@@ -13,11 +16,11 @@ export class Stage {
     this.layer = new Konva.Layer();
     this.ref.add(this.layer);
 
-    useNode().createHost(this.ref, this.layer, 120, 30, "red");
+    /*useNode().createHost(this.ref, this.layer, 120, 30, "red");
     useNode().createHost(this.ref, this.layer, 500, 500, "green");
     useNode().createNetwork(this.ref, this.layer, 500, 100, "red");
     useNode().createNetwork(this.ref, this.layer, 700, 100, "yellow");
-    useNode().createHost(this.ref, this.layer, 500, 500, "green");
+    useNode().createHost(this.ref, this.layer, 500, 500, "green");*/
 
     this.tr = new Konva.Transformer({
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270],
@@ -42,21 +45,38 @@ export class Stage {
 
     let con = this.ref.container();
     con.addEventListener("dragover", (e) => {
-      e.preventDefault(); // !important
+      e.preventDefault();
     });
 
     con.addEventListener("drop", (e) => {
       e.preventDefault();
       console.log(this.ref);
       this.ref.setPointersPositions(e);
-      let pointer = this.ref.getPointerPosition();
-      console.log(pointer);
-      useNode().createHost(
-        this.ref,
-        this.layer,
-        pointer.x,
-        pointer.y
-      );
+      let pointer = this.ref.getRelativePointerPosition();
+      let option = topology.dropedNodeType;
+      console.log(option);
+      switch (option) {
+        case "Host":
+          useNode().createHost(this.ref, this.layer, pointer.x, pointer.y);
+          break;
+        case "Router":
+          useNode().createHost(
+            this.ref,
+            this.layer,
+            pointer.x,
+            pointer.y,
+            "orange",
+            "white",
+            "green",
+            "router"
+          );
+          break;
+        case "Network":
+          useNode().createNetwork(this.ref, this.layer, pointer.x, pointer.y);
+          break;
+        default:
+          break;
+      }
     });
 
     this.ref.on("mousedown touchstart", (e) => this.onMouseDown(e));
@@ -123,9 +143,8 @@ export class Stage {
       this.selectionRectangle.visible(false);
     });
 
-
-    let shapes = this.ref.find('.rect');
-    shapes = shapes.concat(this.ref.find('.network'));
+    let shapes = this.ref.find(".rect");
+    shapes = shapes.concat(this.ref.find(".network"));
     let box = this.selectionRectangle.getClientRect();
     let selected = shapes.filter((shape) =>
       Konva.Util.haveIntersection(box, shape.getClientRect())

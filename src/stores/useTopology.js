@@ -6,6 +6,7 @@ export let useTopologyStore = defineStore("topology", {
       networks: [],
       connections: [],
       nodes: [],
+      dropedNodeType: "",
     };
   },
   actions: {

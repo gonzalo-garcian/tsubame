@@ -36,6 +36,9 @@ const terminalLines = ref([]);
 const terminalBody = ref(null);
 const commandInput = ref(null);
 
+let commandRecord = [];
+let commandRecordIndex = 0;
+
 const DFS = new DepthFirstSearch();
 const focusInput = () => {
   commandInput.value.focus();
@@ -46,6 +49,20 @@ const handleKeyDown = (event) => {
     event.preventDefault();
     clearTerminalOutput();
   }
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (commandRecordIndex > 0) {
+      commandRecordIndex--;
+      currentCommand.value = commandRecord[commandRecordIndex];
+    }
+  }
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    if (commandRecordIndex < commandRecord.length) {
+      commandRecordIndex++;
+      currentCommand.value = commandRecord[commandRecordIndex];
+    }
+  }
 };
 
 const clearTerminalOutput = () => {
@@ -55,6 +72,8 @@ const clearTerminalOutput = () => {
 const executeCommand = () => {
   if (currentCommand.value.trim() !== "") {
     terminalLines.value.push(currentCommand.value + "\n");
+    commandRecord.push(currentCommand.value);
+    commandRecordIndex++;
     currentCommand.value = "";
     nextTick().then(() => scrollTerminalToBottom());
   }

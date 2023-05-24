@@ -1,16 +1,21 @@
 <script setup>
+import {useTopologyStore} from "@/stores/useTopology";
+
 defineProps({
   node: Object,
 });
 
-const drag = (e) => {
-  e.preventDefault();
-  document.body.style.cursor = "grabbing";
+let topology = useTopologyStore();
+
+const startDrag = (e, nodeType) => {
+  //e.preventDefault();
+  topology.dropedNodeType = nodeType;
+  console.log(topology.dropedNodeType);
 };
 </script>
 
 <template>
-  <div class="node-item" draggable="true" @ondragstart="drag(event)">
+  <div class="node-item" draggable @dragstart="startDrag($event, node.name)">
     <img :src="node.img" :alt="node.alt" />
     <h1>{{ node.name }}</h1>
   </div>
