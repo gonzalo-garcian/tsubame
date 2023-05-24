@@ -30,6 +30,9 @@ import { DepthFirstSearch } from "@/models/DepthFirstSearch";
 import { Network } from "@/models/Network";
 import { Interface } from "@/models/Interface";
 import { NetworkNode } from "@/models/NetworkNode";
+import { useTopologyStore } from "@/stores/useTopology";
+
+let topology = useTopologyStore();
 
 const currentCommand = ref("");
 const terminalLines = ref([]);
@@ -54,6 +57,7 @@ const handleKeyDown = (event) => {
     if (commandRecordIndex > 0) {
       commandRecordIndex--;
       currentCommand.value = commandRecord[commandRecordIndex];
+      console.log(commandRecord);
     }
   }
   if (event.key === "ArrowDown") {
@@ -61,6 +65,7 @@ const handleKeyDown = (event) => {
     if (commandRecordIndex < commandRecord.length) {
       commandRecordIndex++;
       currentCommand.value = commandRecord[commandRecordIndex];
+      console.log(commandRecord);
     }
   }
 };
@@ -71,12 +76,48 @@ const clearTerminalOutput = () => {
 
 const executeCommand = () => {
   if (currentCommand.value.trim() !== "") {
-    terminalLines.value.push(currentCommand.value + "\n");
+    let commands = {
+      ping: executePing,
+    };
+
+    let result = "";
+    let mainCommand = currentCommand.value.match(/^\w+/)[0];
+    let commandParams = currentCommand.value.split(" ").slice(1);
+    if (commands[mainCommand]) {
+      result = commands[mainCommand](commandParams);
+    } else {
+      result =
+        "Eso no es un commando... ¿Necesitas ayuda? Usa el comando help para ver la lista de comandos";
+    }
+    terminalLines.value.push(currentCommand.value + "\n" + result);
     commandRecord.push(currentCommand.value);
-    commandRecordIndex++;
+    commandRecordIndex = commandRecord.length;
     currentCommand.value = "";
     nextTick().then(() => scrollTerminalToBottom());
   }
+};
+
+const executePing = (params) => {
+  let source = "";
+  let destination = "";
+
+  function isFlag(param) {
+    return param.includes("-");
+  }
+
+  for (let i = 0; i < params.length; i++) {
+    if (params[i] === "-s" && !isFlag(params[i + 1])) {
+      source = parseInt(params[i + 1]);
+    } else if (params[i] === "-d" && !isFlag(params[i + 1])) {
+      destination = parseInt(params[i + 1]);
+    }
+  }
+
+  let result = DFS.findPath(
+    topology.getNode(source).instanceNode,
+    topology.getNode(destination).instanceNode
+  );
+  return result;
 };
 
 const scrollTerminalToBottom = () => {
@@ -98,7 +139,7 @@ onMounted(() => {
   grid-area: terminal;
 }
 
-.terminal-header{
+.terminal-header {
   font-size: 16px;
 }
 
@@ -113,7 +154,7 @@ onMounted(() => {
 }
 
 .terminal-prompt {
-  color: limegreen;
+  color: #9370db;
   margin-right: 5px;
 }
 

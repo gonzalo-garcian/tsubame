@@ -11,7 +11,7 @@ export class DepthFirstSearch {
   findPath(startNode, targetNode) {
     let stack = [[startNode, []]];
     let visited = new Set();
-
+    console.log(startNode, targetNode);
     while (stack.length > 0) {
       let [currentNodeInterface, currentPath] = stack.pop();
 
@@ -36,6 +36,10 @@ export class DepthFirstSearch {
               gateway.mediaAccessControlAddress ===
               targetNode.mediaAccessControlAddress
             ) {
+
+              for (const eth of currentPath) {
+                console.log(eth);
+              }
               return currentPath.concat(gateway);
             }
 
@@ -48,14 +52,12 @@ export class DepthFirstSearch {
                 gatewayInterface,
                 currentPath.concat(currentNodeInterface, gateway),
               ]);
-
-              for (const eth of stack) {
-              }
             }
           }
         }
       }
     }
+
     return null;
   }
 }

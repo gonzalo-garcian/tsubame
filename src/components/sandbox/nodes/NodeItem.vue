@@ -1,5 +1,5 @@
 <script setup>
-import {useTopologyStore} from "@/stores/useTopology";
+import { useTopologyStore } from "@/stores/useTopology";
 
 defineProps({
   node: Object,
@@ -33,12 +33,12 @@ const startDrag = (e, nodeType) => {
   padding: 20px 20px 20px 20px;
   border-radius: 5px;
   text-align: center;
-  box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.1);
+  box-shadow: 0 4px 8px 0 rgba(147, 112, 219, 0.1);
   transition: 0.3s;
 }
 
 .node-item:hover {
-  box-shadow: 0 8px 16px 0 green;
+  box-shadow: 0 8px 16px 0 rgba(147, 112, 219, 0.5);
   cursor: grab;
 }
 </style>

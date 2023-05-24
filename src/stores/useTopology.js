@@ -31,6 +31,15 @@ export let useTopologyStore = defineStore("topology", {
     addNode(shape, node) {
       this.nodes.push({ shapeNode: shape, instanceNode: node });
     },
+    getNode(nodeId) {
+      let result = null;
+      this.nodes.forEach((node) => {
+        if (node.instanceNode.id === nodeId) {
+          result = node;
+        }
+      });
+      return result;
+    },
     updateConnections() {
       this.connections.forEach((connection) => {
         connection.line.points(
