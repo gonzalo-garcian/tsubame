@@ -27,9 +27,6 @@
 <script setup>
 import { nextTick, onMounted, ref } from "vue";
 import { DepthFirstSearch } from "@/models/DepthFirstSearch";
-import { Network } from "@/models/Network";
-import { Interface } from "@/models/Interface";
-import { NetworkNode } from "@/models/NetworkNode";
 import { useTopologyStore } from "@/stores/useTopology";
 
 let topology = useTopologyStore();
@@ -80,7 +77,7 @@ const executeCommand = () => {
       ping: executePing,
     };
 
-    let result = "";
+    let result;
     let mainCommand = currentCommand.value.match(/^\w+/)[0];
     let commandParams = currentCommand.value.split(" ").slice(1);
     if (commands[mainCommand]) {
