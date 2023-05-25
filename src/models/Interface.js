@@ -2,11 +2,18 @@ import crypto from "crypto";
 import { IdGenerator } from "@/models/IdGenerator";
 
 export class Interface {
-  constructor(network = null, father) {
+  static DIRECTIONS = {
+    RIGHT: 0,
+    DOWN: 1,
+    LEFT: 2,
+    UP: 3,
+  };
+  constructor(network = null, father, direction) {
     this.internetProtocolAddress = "0.0.0.0";
     this.mediaAccessControlAddress = new IdGenerator().generateId();
     this.network = network;
     this.father = father;
+    this.direction = direction;
   }
 
   _generateId() {

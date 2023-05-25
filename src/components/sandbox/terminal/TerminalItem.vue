@@ -3,12 +3,18 @@
     <div class="terminal-header">Network terminal</div>
     <div class="terminal-body" ref="terminalBody">
       <div
-        v-for="(line, index) in terminalLines"
+        v-for="(result, index) in results"
         :key="index"
         class="terminal-line"
       >
         <span class="terminal-prompt">user@terminal:~$</span>
-        <span class="terminal-command">{{ line }}</span>
+        <span class="terminal-command">{{ result.command }}</span>
+        <component
+          v-for="(data, index) in result.dataList"
+          :key="index"
+          :is="result.type"
+          :data="data"
+        />
       </div>
       <div class="terminal-input-container">
         <span class="terminal-prompt">user@terminal:~$</span>
@@ -28,13 +34,14 @@
 import { nextTick, onMounted, ref } from "vue";
 import { DepthFirstSearch } from "@/models/DepthFirstSearch";
 import { useTopologyStore } from "@/stores/useTopology";
+import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
 
 let topology = useTopologyStore();
 
 const currentCommand = ref("");
-const terminalLines = ref([]);
 const terminalBody = ref(null);
 const commandInput = ref(null);
+let results = [];
 
 let commandRecord = [];
 let commandRecordIndex = 0;
@@ -68,25 +75,21 @@ const handleKeyDown = (event) => {
 };
 
 const clearTerminalOutput = () => {
-  terminalLines.value = [];
+  results = [];
 };
 
 const executeCommand = () => {
   if (currentCommand.value.trim() !== "") {
     let commands = {
       ping: executePing,
+      help: executeHelp,
     };
 
-    let result;
     let mainCommand = currentCommand.value.match(/^\w+/)[0];
     let commandParams = currentCommand.value.split(" ").slice(1);
     if (commands[mainCommand]) {
-      result = commands[mainCommand](commandParams);
-    } else {
-      result =
-        "Eso no es un commando... ¿Necesitas ayuda? Usa el comando help para ver la lista de comandos";
+      commands[mainCommand](commandParams);
     }
-    terminalLines.value.push(currentCommand.value + "\n" + result);
     commandRecord.push(currentCommand.value);
     commandRecordIndex = commandRecord.length;
     currentCommand.value = "";
@@ -94,10 +97,24 @@ const executeCommand = () => {
   }
 };
 
+const executeHelp = (params) => {
+  return "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  \n-d: a que nodo se quiere enviar";
+};
 const executePing = (params) => {
   let source = "";
   let destination = "";
 
+  results.push({
+    command: currentCommand.value,
+    type: PingItem,
+    dataList: [],
+  });
+
+  results[results.length - 1].dataList.push({
+    name: "ping",
+  });
+
+  /*
   function isFlag(param) {
     return param.includes("-");
   }
@@ -139,19 +156,54 @@ const executePing = (params) => {
   //Sent datagrams.
   for (let j = 0; j < path.length; j += 2) {
     result +=
-      "IP | TTL = " +
+      "MAC_S = MAC Host [" +
+      path[j].father.id +
+      "] Eth [" +
+      path[j].direction +
+      "] | MAC_D = MAC Host[" +
+      path[j + 1].father.id +
+      "] Eth [" +
+      path[j + 1].direction +
+      "] | IP | TTL = " +
       --TTL +
       " | ICMP (1) | IP_S = IP Host [" +
       path[0].father.id +
-      "] Network [" +
-      path[0].network.id +
+      "] Eth [" +
+      path[0].direction +
       "] | IP_D = IP Host[" +
       path[path.length - 1].father.id +
-      "] Network [" +
-      path[path.length - 1].network.id +
+      "] Eth [" +
+      path[path.length - 1].direction +
+      "] | Msg Type = Echo Request (8) | Code = Network unreachable (0) \n";
+  }
+
+  result += "REPLY \n";
+
+  for (let j = path.length - 1; j > 0; j -= 2) {
+    result +=
+      "MAC_S = MAC Host [" +
+      path[j].father.id +
+      "] Eth [" +
+      path[j].direction +
+      "] | MAC_D = MAC Host[" +
+      path[j - 1].father.id +
+      "] Eth [" +
+      path[j - 1].direction +
+      "] | IP | TTL = " +
+      --TTL +
+      " | ICMP (1) | IP_S = IP Host [" +
+      path[path.length - 1].father.id +
+      "] Eth [" +
+      path[path.length - 1].direction +
+      "] | IP_D = IP Host[" +
+      path[0].father.id +
+      "] Eth [" +
+      path[0].direction +
       "] | Msg Type = Echo Request (8) | Code = Network unreachable (0) \n";
   }
   return result;
+
+   */
 };
 
 const scrollTerminalToBottom = () => {
@@ -165,7 +217,7 @@ onMounted(() => {
 
 <style scoped>
 .terminal {
-  height: 200px;
+  height: 300px;
   background-color: #303030;
   color: white;
   font-family: monospace;
@@ -178,7 +230,7 @@ onMounted(() => {
 }
 
 .terminal-body {
-  height: 150px;
+  height: 250px;
   overflow-y: auto;
   font-size: 14px;
 }
@@ -202,6 +254,7 @@ onMounted(() => {
   outline: none;
   color: #fff;
   caret-shape: block;
+  width: 50%;
 }
 
 /* Custom scroll bar styles */

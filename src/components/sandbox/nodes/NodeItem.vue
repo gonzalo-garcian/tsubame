@@ -35,6 +35,7 @@ const startDrag = (e, nodeType) => {
   text-align: center;
   box-shadow: 0 4px 8px 0 rgba(147, 112, 219, 0.1);
   transition: 0.3s;
+  user-select: none;
 }
 
 .node-item:hover {

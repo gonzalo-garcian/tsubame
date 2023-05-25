@@ -189,7 +189,7 @@ export function useNode() {
       draggable: true,
     });
 
-    let eth0L = new Interface(null, hostL);
+    let eth0L = new Interface(null, hostL, "RIGHT");
     hostL.addInterface(eth0L);
     setEvents(eth0, eth0L);
     layer.add(eth0);
@@ -204,7 +204,7 @@ export function useNode() {
       draggable: true,
     });
 
-    let eth1L = new Interface(null, hostL);
+    let eth1L = new Interface(null, hostL, "DOWN");
     setEvents(eth1, eth1L);
     hostL.addInterface(eth1L);
     layer.add(eth1);
@@ -219,7 +219,7 @@ export function useNode() {
       draggable: true,
     });
 
-    let eth2L = new Interface(null, hostL);
+    let eth2L = new Interface(null, hostL, "LEFT");
     hostL.addInterface(eth2L);
     setEvents(eth2, eth2L);
     layer.add(eth2);
@@ -234,7 +234,7 @@ export function useNode() {
       draggable: true,
     });
 
-    let eth3L = new Interface(null, hostL);
+    let eth3L = new Interface(null, hostL, "UP");
     hostL.addInterface(eth3L);
     setEvents(eth3, eth3L);
     layer.add(eth3);
