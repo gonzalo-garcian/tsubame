@@ -31,11 +31,11 @@ export let useTopologyStore = defineStore("topology", {
     addNode(shape, node) {
       this.nodes.push({ shapeNode: shape, instanceNode: node });
     },
-    getNode(nodeId) {
+    getNodeInstance(nodeId) {
       let result = null;
       this.nodes.forEach((node) => {
         if (node.instanceNode.id === nodeId) {
-          result = node;
+          result = node.instanceNode;
         }
       });
       return result;

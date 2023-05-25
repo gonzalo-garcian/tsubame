@@ -113,10 +113,47 @@ const executePing = (params) => {
     }
   }
 
-  let result = DFS.findPath(
-    topology.getNode(source).instanceNode,
-    topology.getNode(destination).instanceNode
-  );
+  //Get randomly one interface with connection.
+  let interfaceSource = topology.getNodeInstance(source).interfaces;
+  interfaceSource = interfaceSource.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+  console.log(interfaceSource);
+  interfaceSource =
+    interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
+  console.log(interfaceSource);
+
+  let interfaceDestination = topology.getNodeInstance(destination).interfaces;
+  interfaceDestination = interfaceDestination.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+  console.log(interfaceDestination);
+  interfaceDestination =
+    interfaceDestination[
+      Math.floor(Math.random() * interfaceDestination.length)
+    ];
+  console.log(interfaceDestination);
+
+  let path = DFS.findPath(interfaceSource, interfaceDestination);
+
+  let result = "";
+  let TTL = 64;
+
+  //Sent datagrams.
+  for (let j = 0; j < path.length; j += 2) {
+    result +=
+      "IP | TTL = " +
+      --TTL +
+      " | ICMP (1) | IP_S = IP Host [" +
+      path[0].father.id +
+      "] Network [" +
+      path[0].network.id +
+      "] | IP_D = IP Host[" +
+      path[path.length - 1].father.id +
+      "] Network [" +
+      path[path.length - 1].network.id +
+      "] | Msg Type = Echo Request (8) | Code = Network unreachable (0) \n";
+  }
   return result;
 };
 

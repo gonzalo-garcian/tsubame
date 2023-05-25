@@ -19,10 +19,13 @@ export class DepthFirstSearch {
         currentNodeInterface.mediaAccessControlAddress ===
         targetNode.mediaAccessControlAddress
       ) {
-        return currentPath.concat(currentNodeInterface);
+        console.log(currentNodeInterface);
+        currentPath = currentPath.concat(currentNodeInterface);
+        console.log(currentPath);
+        return currentPath;
       }
 
-      if (!visited.has(currentNodeInterface)) {
+      if ((!visited.has(currentNodeInterface)) && (currentNodeInterface.network !== null)) {
         visited.add(currentNodeInterface);
 
         for (const gateway of currentNodeInterface.network.nodeInterfaces) {
@@ -36,11 +39,11 @@ export class DepthFirstSearch {
               gateway.mediaAccessControlAddress ===
               targetNode.mediaAccessControlAddress
             ) {
-
-              for (const eth of currentPath) {
-                console.log(eth);
-              }
-              return currentPath.concat(gateway);
+              console.log(gateway);
+              currentPath = currentPath.concat(currentNodeInterface);
+              currentPath = currentPath.concat(gateway);
+              console.log(currentPath);
+              return currentPath;
             }
 
             visited.add(gateway);
