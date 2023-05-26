@@ -1,10 +1,81 @@
 <script setup>
 const props = defineProps(["data"]);
 console.log("Se ha montado correctamente el PingItem");
+
+/*
+{ MAC_S: "MAC_H-" + path[j].father.id + "_ETH-" + path[j].direction,
+  MAC_D: "MAC_H-" + path[j + 1].father.id + "_ETH-" + path[j + 1].direction, PROTOCOL_N:
+"IP", IP_S: "IP_H-" + path[0].father.id + "_ETH-" + path[0].direction, IP_D:
+"IP_H-" + path[path.length - 1].father.id + "_ETH-" + path[path.length -
+1].direction, TTL: --TTL, PROTOCOL_IP: "ICMP (1)", MSG_TYPE: "Echo Request (8)",
+CODE: "Network unreachable (0)", }
+*/
 </script>
 
 <template>
-  <h1>This is a Ping result.</h1>
+  <table>
+    <tbody>
+      <tr>
+        <td colspan="3" class="frame">FRAME</td>
+        <td colspan="4" class="datagram">DATAGRAM</td>
+        <td colspan="2" class="data">DATA</td>
+      </tr>
+      <tr>
+        <td class="attribute">MAC SOURCE</td>
+        <td class="attribute">MAC DESTINATION</td>
+        <td class="attribute">PROTOCOL</td>
+        <td class="attribute">IP SOURCE</td>
+        <td class="attribute">IP DESTINATION</td>
+        <td class="attribute">TTL</td>
+        <td class="attribute">PROTOCOL</td>
+        <td class="attribute">MSG TYPE</td>
+        <td class="attribute">CODE</td>
+      </tr>
+      <tr>
+        <td>{{ data.MAC_S }}</td>
+        <td>{{ data.MAC_D }}</td>
+        <td>{{ data.PROTOCOL_N }}</td>
+        <td>{{ data.IP_S }}</td>
+        <td>{{ data.IP_D }}</td>
+        <td>{{ data.TTL }}</td>
+        <td>{{ data.PROTOCOL_IP }}</td>
+        <td>{{ data.MSG_TYPE }}</td>
+        <td>{{ data.CODE }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <br />
 </template>
 
-<style scoped></style>
+<style scoped>
+.frame {
+  text-align: center;
+  background: #4cad4c;
+}
+
+.datagram{
+  background: #c51d34;
+}
+.data {
+  background: #8892c6;
+}
+
+.attribute {
+  background: #9ca3af;
+}
+
+table,
+td,
+th {
+  text-align: center;
+  border: 1px solid #595959;
+  border-collapse: collapse;
+  color: white;
+}
+td,
+th {
+  padding: 3px;
+  width: 170px;
+  height: 25px;
+}
+</style>

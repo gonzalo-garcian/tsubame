@@ -9,6 +9,7 @@
       >
         <span class="terminal-prompt">user@terminal:~$</span>
         <span class="terminal-command">{{ result.command }}</span>
+        <br />
         <component
           v-for="(data, index) in result.dataList"
           :key="index"
@@ -17,7 +18,9 @@
         />
       </div>
       <div class="terminal-input-container">
-        <span class="terminal-prompt">user@terminal:~$</span>
+        <span class="terminal-prompt" v-if="!isExecCommand"
+          >user@terminal:~$</span
+        >
         <input
           class="terminal-input"
           type="text"
@@ -41,7 +44,8 @@ let topology = useTopologyStore();
 const currentCommand = ref("");
 const terminalBody = ref(null);
 const commandInput = ref(null);
-let results = [];
+const results = ref([]);
+const isExecCommand = ref(false);
 
 let commandRecord = [];
 let commandRecordIndex = 0;
@@ -75,10 +79,12 @@ const handleKeyDown = (event) => {
 };
 
 const clearTerminalOutput = () => {
-  results = [];
+  console.log("En principio lo estoy limpiando...");
+  results.value = [];
 };
 
 const executeCommand = () => {
+  isExecCommand.value = true;
   if (currentCommand.value.trim() !== "") {
     let commands = {
       ping: executePing,
@@ -97,24 +103,29 @@ const executeCommand = () => {
   }
 };
 
-const executeHelp = (params) => {
-  return "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  \n-d: a que nodo se quiere enviar";
+const sleep = (delay) => {
+  return new Promise((resolve) => setTimeout(resolve, delay));
 };
-const executePing = (params) => {
+
+const executeHelp = () => {
+  let result =
+    "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  " +
+    "\n-d: a que nodo se quiere enviar" +
+    "\n-delay: número en milisegundos que la trama tarda en aparecer"
+  console.log(result);
+  isExecCommand.value = false;
+};
+const executePing = async (params) => {
   let source = "";
   let destination = "";
+  let delay = 0;
 
-  results.push({
+  results.value.push({
     command: currentCommand.value,
     type: PingItem,
     dataList: [],
   });
 
-  results[results.length - 1].dataList.push({
-    name: "ping",
-  });
-
-  /*
   function isFlag(param) {
     return param.includes("-");
   }
@@ -124,6 +135,8 @@ const executePing = (params) => {
       source = parseInt(params[i + 1]);
     } else if (params[i] === "-d" && !isFlag(params[i + 1])) {
       destination = parseInt(params[i + 1]);
+    } else if (params[i] === "-delay" && !isFlag(params[i + 1])) {
+      delay = parseInt(params[i + 1]);
     }
   }
 
@@ -150,60 +163,54 @@ const executePing = (params) => {
 
   let path = DFS.findPath(interfaceSource, interfaceDestination);
 
-  let result = "";
-  let TTL = 64;
+  let REQ_TTL = 64;
+  let RES_TTL = 64;
 
   //Sent datagrams.
   for (let j = 0; j < path.length; j += 2) {
-    result +=
-      "MAC_S = MAC Host [" +
-      path[j].father.id +
-      "] Eth [" +
-      path[j].direction +
-      "] | MAC_D = MAC Host[" +
-      path[j + 1].father.id +
-      "] Eth [" +
-      path[j + 1].direction +
-      "] | IP | TTL = " +
-      --TTL +
-      " | ICMP (1) | IP_S = IP Host [" +
-      path[0].father.id +
-      "] Eth [" +
-      path[0].direction +
-      "] | IP_D = IP Host[" +
-      path[path.length - 1].father.id +
-      "] Eth [" +
-      path[path.length - 1].direction +
-      "] | Msg Type = Echo Request (8) | Code = Network unreachable (0) \n";
-  }
+    let res = {
+      MAC_S: "H" + path[j].father.id + "_ETH-" + path[j].direction,
+      MAC_D: "H" + path[j + 1].father.id + "_ETH-" + path[j + 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S: "H" + path[0].father.id + "_ETH-" + path[0].direction,
+      IP_D:
+        "H" +
+        path[path.length - 1].father.id +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      TTL: --REQ_TTL,
+      PROTOCOL_IP: "ICMP (1)",
+      MSG_TYPE: "Echo Request (8)",
+      CODE: "Network unreachable (0)",
+    };
 
-  result += "REPLY \n";
+    await sleep(delay);
+    results.value[results.value.length - 1].dataList.push(res);
+    nextTick().then(() => scrollTerminalToBottom());
+  }
 
   for (let j = path.length - 1; j > 0; j -= 2) {
-    result +=
-      "MAC_S = MAC Host [" +
-      path[j].father.id +
-      "] Eth [" +
-      path[j].direction +
-      "] | MAC_D = MAC Host[" +
-      path[j - 1].father.id +
-      "] Eth [" +
-      path[j - 1].direction +
-      "] | IP | TTL = " +
-      --TTL +
-      " | ICMP (1) | IP_S = IP Host [" +
-      path[path.length - 1].father.id +
-      "] Eth [" +
-      path[path.length - 1].direction +
-      "] | IP_D = IP Host[" +
-      path[0].father.id +
-      "] Eth [" +
-      path[0].direction +
-      "] | Msg Type = Echo Request (8) | Code = Network unreachable (0) \n";
-  }
-  return result;
+    let res = {
+      MAC_S: "H" + path[j].father.id + "_ETH-" + path[j].direction,
+      MAC_D: "H" + path[j - 1].father.id + "_ETH-" + path[j - 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S:
+        "H" +
+        path[path.length - 1].father.id +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      IP_D: "H" + path[0].father.id + "_ETH-" + path[0].direction,
+      TTL: --RES_TTL,
+      PROTOCOL_IP: "ICMP (1)",
+      MSG_TYPE: "Echo Request (8)",
+      CODE: "Network unreachable (0)",
+    };
 
-   */
+    await sleep(delay);
+    results.value[results.value.length - 1].dataList.push(res);
+    nextTick().then(() => scrollTerminalToBottom());
+  }
+  isExecCommand.value = false;
 };
 
 const scrollTerminalToBottom = () => {
