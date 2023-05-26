@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "Network",
-    "img": "src/assets/network-node.png",
+    "img": "./src/assets/network-node.png",
     "alt": "Circle that represents a network node."
   },
   {
