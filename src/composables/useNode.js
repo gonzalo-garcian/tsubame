@@ -3,6 +3,7 @@ import { useTopologyStore } from "@/stores/useTopology";
 import { Interface } from "@/models/Interface";
 import { NetworkNode } from "@/models/NetworkNode";
 import { Network } from "@/models/Network";
+import { IdGenerator } from "@/models/IdGenerator";
 
 let topology = useTopologyStore();
 
@@ -118,8 +119,14 @@ export function useNode() {
 
       eth.on("dragend", function () {
         let pointerPos = stage.getPointerPosition();
-        let intersectedObj = stage.getIntersection(pointerPos);
+        let intersectedObjs = stage.getAllIntersections(pointerPos);
+        let intersectedObj = intersectedObjs[0];
 
+        intersectedObjs.forEach((obj) => {
+          if (obj.attrs.name === "network") {
+            intersectedObj = obj;
+          }
+        });
         console.log(intersectedObj);
 
         tempAnchor.visible(false);
@@ -165,7 +172,11 @@ export function useNode() {
     }
 
     let host = new Konva.Rect({
-      id: "host3",
+      id:
+        ntype[0].toUpperCase() +
+        (ntype === "host"
+          ? new IdGenerator().generateHostId()
+          : new IdGenerator().generateRouterId()),
       name: "rect",
       x: x,
       y: y,
@@ -178,6 +189,31 @@ export function useNode() {
     topology.addNode(host, hostL);
     layer.add(host);
     console.log(topology.nodes);
+
+    let idText = new Konva.Text({
+      text: host.id(),
+      fontSize: 30,
+      fontFamily: "Calibri",
+      fill: "black",
+      draggable: true,
+    });
+    layer.add(idText);
+
+    idText.setAttrs({
+      x: host.x() + host.width() / 2 - idText.width() / 2,
+      y: host.y() + host.height() / 2 - idText.height() / 2,
+    });
+
+    idText.on("dragmove", function () {
+      host.setAttrs({
+        x: idText.x() + idText.width() / 2 - host.width() / 2,
+        y: idText.y() + idText.height() / 2 - host.height() / 2,
+      });
+      stage.container().style.cursor = "grabbing";
+      topology.updateConnections();
+      recalculateAnchorPosition();
+      layer.batchDraw();
+    });
 
     let eth0 = new Konva.Circle({
       name: "anchor",
@@ -284,6 +320,10 @@ export function useNode() {
 
     host.on("dragmove", function () {
       stage.container().style.cursor = "grabbing";
+      idText.position({
+        x: host.x() + host.width() / 2 - idText.width() / 2,
+        y: host.y() + host.height() / 2 - idText.height() / 2,
+      });
       topology.updateConnections();
       recalculateAnchorPosition();
       layer.batchDraw();
@@ -306,6 +346,7 @@ export function useNode() {
 
   function createNetwork(stage, layer, x, y, color = "yellow") {
     let network = new Konva.Circle({
+      id: "N" + new IdGenerator().generateNetworkId(),
       name: "network",
       x: x,
       y: y,
@@ -318,8 +359,36 @@ export function useNode() {
     topology.addNetwork(network, networkL);
     layer.add(network);
 
+    let idText = new Konva.Text({
+      text: network.id(),
+      fontSize: 30,
+      fontFamily: "Calibri",
+      fill: "black",
+      draggable: true,
+    });
+    layer.add(idText);
+
+    idText.setAttrs({
+      x: network.x() - idText.width() / 2,
+      y: network.y() - idText.height() / 2,
+    });
+
+    idText.on("dragmove", function () {
+      network.setAttrs({
+        x: idText.x() + idText.width() / 2,
+        y: idText.y() + idText.height() / 2,
+      });
+      stage.container().style.cursor = "grabbing";
+      topology.updateConnections();
+      layer.batchDraw();
+    });
+
     network.on("dragmove", function () {
       stage.container().style.cursor = "grabbing";
+      idText.setAttrs({
+        x: network.x() - idText.width() / 2,
+        y: network.y() - idText.height() / 2,
+      });
       topology.updateConnections();
       layer.batchDraw();
     });
