@@ -38,6 +38,7 @@ import { nextTick, onMounted, ref } from "vue";
 import { DepthFirstSearch } from "@/models/DepthFirstSearch";
 import { useTopologyStore } from "@/stores/useTopology";
 import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
+import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue";
 
 let topology = useTopologyStore();
 
@@ -79,12 +80,10 @@ const handleKeyDown = (event) => {
 };
 
 const clearTerminalOutput = () => {
-  console.log("En principio lo estoy limpiando...");
   results.value = [];
 };
 
 const executeCommand = () => {
-  isExecCommand.value = true;
   if (currentCommand.value.trim() !== "") {
     let commands = {
       ping: executePing,
@@ -94,7 +93,18 @@ const executeCommand = () => {
     let mainCommand = currentCommand.value.match(/^\w+/)[0];
     let commandParams = currentCommand.value.split(" ").slice(1);
     if (commands[mainCommand]) {
+      isExecCommand.value = true;
       commands[mainCommand](commandParams);
+    } else {
+      results.value.push({
+        command: currentCommand.value,
+        type: ErrorLogItem,
+        dataList: [
+          {
+            ERROR_LOG: "Command not found",
+          },
+        ],
+      });
     }
     commandRecord.push(currentCommand.value);
     commandRecordIndex = commandRecord.length;
@@ -108,11 +118,18 @@ const sleep = (delay) => {
 };
 
 const executeHelp = () => {
-  let result =
-    "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  " +
-    "\n-d: a que nodo se quiere enviar" +
-    "\n-delay: número en milisegundos que la trama tarda en aparecer"
-  console.log(result);
+  results.value.push({
+    command: currentCommand.value,
+    type: ErrorLogItem,
+    dataList: [
+      {
+        ERROR_LOG:
+          "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  " +
+          "\n-d: a que nodo se quiere enviar" +
+          "\n-delay: número en milisegundos que la trama tarda en aparecer",
+      },
+    ],
+  });
   isExecCommand.value = false;
 };
 const executePing = async (params) => {
@@ -140,75 +157,114 @@ const executePing = async (params) => {
     }
   }
 
-  //Get randomly one interface with connection.
-  let interfaceSource = topology.getNodeInstance(source).interfaces;
-  interfaceSource = interfaceSource.filter((cInterface) => {
-    return cInterface.network !== null;
-  });
-  console.log(interfaceSource);
-  interfaceSource =
-    interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
-  console.log(interfaceSource);
+  try {
+    //Get randomly one interface with connection.
+    let interfaceSource = topology.getNodeInstance(source).interfaces;
+    interfaceSource = interfaceSource.filter((cInterface) => {
+      return cInterface.network !== null;
+    });
+    console.log(interfaceSource);
+    interfaceSource =
+      interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
+    console.log(interfaceSource);
 
-  let interfaceDestination = topology.getNodeInstance(destination).interfaces;
-  interfaceDestination = interfaceDestination.filter((cInterface) => {
-    return cInterface.network !== null;
-  });
-  console.log(interfaceDestination);
-  interfaceDestination =
-    interfaceDestination[
-      Math.floor(Math.random() * interfaceDestination.length)
-    ];
-  console.log(interfaceDestination);
+    let interfaceDestination = topology.getNodeInstance(destination).interfaces;
+    interfaceDestination = interfaceDestination.filter((cInterface) => {
+      return cInterface.network !== null;
+    });
+    console.log(interfaceDestination);
+    interfaceDestination =
+      interfaceDestination[
+        Math.floor(Math.random() * interfaceDestination.length)
+      ];
+    console.log(interfaceDestination);
 
-  let path = DFS.findPath(interfaceSource, interfaceDestination);
+    let path = DFS.findPath(interfaceSource, interfaceDestination);
 
-  let REQ_TTL = 64;
-  let RES_TTL = 64;
+    let REQ_TTL = 64;
+    let RES_TTL = 64;
 
-  //Sent datagrams.
-  for (let j = 0; j < path.length; j += 2) {
-    let res = {
-      MAC_S: "H" + path[j].father.id + "_ETH-" + path[j].direction,
-      MAC_D: "H" + path[j + 1].father.id + "_ETH-" + path[j + 1].direction,
-      PROTOCOL_N: "IP",
-      IP_S: "H" + path[0].father.id + "_ETH-" + path[0].direction,
-      IP_D:
-        "H" +
-        path[path.length - 1].father.id +
-        "_ETH-" +
-        path[path.length - 1].direction,
-      TTL: --REQ_TTL,
-      PROTOCOL_IP: "ICMP (1)",
-      MSG_TYPE: "Echo Request (8)",
-      CODE: "Network unreachable (0)",
-    };
+    //Sent datagrams.
+    for (let j = 0; j < path.length; j += 2) {
+      let res = {
+        MAC_S:
+          path[j].father.type[0].toUpperCase() +
+          path[j].father.id +
+          "_ETH-" +
+          path[j].direction,
+        MAC_D:
+          path[j + 1].father.type[0].toUpperCase() +
+          path[j + 1].father.id +
+          "_ETH-" +
+          path[j + 1].direction,
+        PROTOCOL_N: "IP",
+        IP_S:
+          path[0].father.type[0].toUpperCase() +
+          path[0].father.id +
+          "_ETH-" +
+          path[0].direction,
+        IP_D:
+          path[path.length - 1].father.type[0].toUpperCase() +
+          path[path.length - 1].father.id +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        TTL: --REQ_TTL,
+        PROTOCOL_IP: "ICMP (1)",
+        MSG_TYPE: "Echo Request (8)",
+        CODE: "Network unreachable (0)",
+      };
 
-    await sleep(delay);
-    results.value[results.value.length - 1].dataList.push(res);
-    nextTick().then(() => scrollTerminalToBottom());
-  }
+      await sleep(delay);
+      results.value[results.value.length - 1].dataList.push(res);
+      nextTick().then(() => scrollTerminalToBottom());
+    }
 
-  for (let j = path.length - 1; j > 0; j -= 2) {
-    let res = {
-      MAC_S: "H" + path[j].father.id + "_ETH-" + path[j].direction,
-      MAC_D: "H" + path[j - 1].father.id + "_ETH-" + path[j - 1].direction,
-      PROTOCOL_N: "IP",
-      IP_S:
-        "H" +
-        path[path.length - 1].father.id +
-        "_ETH-" +
-        path[path.length - 1].direction,
-      IP_D: "H" + path[0].father.id + "_ETH-" + path[0].direction,
-      TTL: --RES_TTL,
-      PROTOCOL_IP: "ICMP (1)",
-      MSG_TYPE: "Echo Reply (0)",
-      CODE: "Network unreachable (0)",
-    };
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      let res = {
+        MAC_S:
+          path[j].father.type[0].toUpperCase() +
+          path[j].father.id +
+          "_ETH-" +
+          path[j].direction,
+        MAC_D:
+          path[j - 1].father.type[0].toUpperCase() +
+          path[j - 1].father.id +
+          "_ETH-" +
+          path[j - 1].direction,
+        PROTOCOL_N: "IP",
+        IP_S:
+          path[path.length - 1].father.type[0].toUpperCase() +
+          path[path.length - 1].father.id +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        IP_D:
+          path[0].father.type[0].toUpperCase() +
+          path[0].father.id +
+          "_ETH-" +
+          path[0].direction,
+        TTL: --RES_TTL,
+        PROTOCOL_IP: "ICMP (1)",
+        MSG_TYPE: "Echo Reply (0)",
+        CODE: "Network unreachable (0)",
+      };
 
-    await sleep(delay);
-    results.value[results.value.length - 1].dataList.push(res);
-    nextTick().then(() => scrollTerminalToBottom());
+      await sleep(delay);
+      results.value[results.value.length - 1].dataList.push(res);
+      nextTick().then(() => scrollTerminalToBottom());
+    }
+  } catch (e) {
+    results.value.pop();
+    results.value.push({
+      command: currentCommand.value,
+      type: ErrorLogItem,
+      dataList: [
+        {
+          ERROR_LOG:
+            "To use ping properly, make sure you're using a valid node and valid flags\nExample: ping -s H1 -d H2 -delay 2000\nFurther details--> " +
+            e,
+        },
+      ],
+    });
   }
   isExecCommand.value = false;
 };

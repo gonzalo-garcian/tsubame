@@ -1,15 +1,5 @@
 <script setup>
-const props = defineProps(["data"]);
-console.log("Se ha montado correctamente el PingItem");
-
-/*
-{ MAC_S: "MAC_H-" + path[j].father.id + "_ETH-" + path[j].direction,
-  MAC_D: "MAC_H-" + path[j + 1].father.id + "_ETH-" + path[j + 1].direction, PROTOCOL_N:
-"IP", IP_S: "IP_H-" + path[0].father.id + "_ETH-" + path[0].direction, IP_D:
-"IP_H-" + path[path.length - 1].father.id + "_ETH-" + path[path.length -
-1].direction, TTL: --TTL, PROTOCOL_IP: "ICMP (1)", MSG_TYPE: "Echo Request (8)",
-CODE: "Network unreachable (0)", }
-*/
+defineProps(["data"]);
 </script>
 
 <template>
@@ -53,7 +43,7 @@ CODE: "Network unreachable (0)", }
   background: #4cad4c;
 }
 
-.datagram{
+.datagram {
   background: #c51d34;
 }
 .data {
