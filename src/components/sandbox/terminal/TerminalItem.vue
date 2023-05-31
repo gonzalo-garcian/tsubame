@@ -202,7 +202,7 @@ const executePing = async (params) => {
       IP_D: "H" + path[0].father.id + "_ETH-" + path[0].direction,
       TTL: --RES_TTL,
       PROTOCOL_IP: "ICMP (1)",
-      MSG_TYPE: "Echo Request (8)",
+      MSG_TYPE: "Echo Reply (0)",
       CODE: "Network unreachable (0)",
     };
 
