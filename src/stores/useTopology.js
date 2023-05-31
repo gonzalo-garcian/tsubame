@@ -40,6 +40,16 @@ export let useTopologyStore = defineStore("topology", {
       });
       return result;
     },
+    getNodeInstanceByStringId(nodeStringId) {
+      let result = null;
+      this.nodes.forEach((node) => {
+        console.log(node.shapeNode.id());
+        if (node.shapeNode.id() === nodeStringId) {
+          result = node.instanceNode;
+        }
+      });
+      return result;
+    },
     updateConnections() {
       this.connections.forEach((connection) => {
         connection.line.points(

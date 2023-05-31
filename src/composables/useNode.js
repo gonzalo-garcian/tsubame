@@ -171,12 +171,9 @@ export function useNode() {
       });
     }
 
+    let hostL = new NetworkNode(ntype.toLowerCase());
     let host = new Konva.Rect({
-      id:
-        ntype[0].toUpperCase() +
-        (ntype === "host"
-          ? new IdGenerator().generateHostId()
-          : new IdGenerator().generateRouterId()),
+      id: hostL.stringId,
       name: "rect",
       x: x,
       y: y,
@@ -185,7 +182,7 @@ export function useNode() {
       fill: color,
       draggable: true,
     });
-    let hostL = new NetworkNode(ntype.toLowerCase());
+
     topology.addNode(host, hostL);
     layer.add(host);
     console.log(topology.nodes);

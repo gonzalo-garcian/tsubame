@@ -149,17 +149,23 @@ const executePing = async (params) => {
 
   for (let i = 0; i < params.length; i++) {
     if (params[i] === "-s" && !isFlag(params[i + 1])) {
-      source = parseInt(params[i + 1]);
+      source = params[i + 1];
     } else if (params[i] === "-d" && !isFlag(params[i + 1])) {
-      destination = parseInt(params[i + 1]);
+      destination = params[i + 1];
     } else if (params[i] === "-delay" && !isFlag(params[i + 1])) {
       delay = parseInt(params[i + 1]);
     }
   }
 
+  console.log("NODO_S -> " + source);
+  console.log(topology.getNodeInstanceByStringId(source));
+
+  console.log("NODO_D -> " + destination);
+  console.log(topology.getNodeInstanceByStringId(destination));
+
   try {
     //Get randomly one interface with connection.
-    let interfaceSource = topology.getNodeInstance(source).interfaces;
+    let interfaceSource = topology.getNodeInstanceByStringId(source).interfaces;
     interfaceSource = interfaceSource.filter((cInterface) => {
       return cInterface.network !== null;
     });
@@ -168,7 +174,8 @@ const executePing = async (params) => {
       interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
     console.log(interfaceSource);
 
-    let interfaceDestination = topology.getNodeInstance(destination).interfaces;
+    let interfaceDestination =
+      topology.getNodeInstanceByStringId(destination).interfaces;
     interfaceDestination = interfaceDestination.filter((cInterface) => {
       return cInterface.network !== null;
     });
@@ -187,25 +194,12 @@ const executePing = async (params) => {
     //Sent datagrams.
     for (let j = 0; j < path.length; j += 2) {
       let res = {
-        MAC_S:
-          path[j].father.type[0].toUpperCase() +
-          path[j].father.id +
-          "_ETH-" +
-          path[j].direction,
-        MAC_D:
-          path[j + 1].father.type[0].toUpperCase() +
-          path[j + 1].father.id +
-          "_ETH-" +
-          path[j + 1].direction,
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
         PROTOCOL_N: "IP",
-        IP_S:
-          path[0].father.type[0].toUpperCase() +
-          path[0].father.id +
-          "_ETH-" +
-          path[0].direction,
+        IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
         IP_D:
-          path[path.length - 1].father.type[0].toUpperCase() +
-          path[path.length - 1].father.id +
+          path[path.length - 1].father.stringId +
           "_ETH-" +
           path[path.length - 1].direction,
         TTL: --REQ_TTL,
@@ -221,27 +215,14 @@ const executePing = async (params) => {
 
     for (let j = path.length - 1; j > 0; j -= 2) {
       let res = {
-        MAC_S:
-          path[j].father.type[0].toUpperCase() +
-          path[j].father.id +
-          "_ETH-" +
-          path[j].direction,
-        MAC_D:
-          path[j - 1].father.type[0].toUpperCase() +
-          path[j - 1].father.id +
-          "_ETH-" +
-          path[j - 1].direction,
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
         PROTOCOL_N: "IP",
         IP_S:
-          path[path.length - 1].father.type[0].toUpperCase() +
-          path[path.length - 1].father.id +
+          path[path.length - 1].father.stringId +
           "_ETH-" +
           path[path.length - 1].direction,
-        IP_D:
-          path[0].father.type[0].toUpperCase() +
-          path[0].father.id +
-          "_ETH-" +
-          path[0].direction,
+        IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
         TTL: --RES_TTL,
         PROTOCOL_IP: "ICMP (1)",
         MSG_TYPE: "Echo Reply (0)",
