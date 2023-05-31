@@ -2,19 +2,19 @@
   {
     "id": 1,
     "name": "Network",
-    "img": "https://imgur.com/DTalrj1",
+    "img": "https://imgur.com/DTalrj1.png",
     "alt": "Circle that represents a network node."
   },
   {
     "id": 2,
     "name": "Host",
-    "img": "https://imgur.com/Q8NcHRs",
+    "img": "https://imgur.com/Q8NcHRs.png",
     "alt": "Square that represents a host."
   },
   {
     "id": 3,
     "name": "Router",
-    "img": "https://imgur.com/urZFKg0",
+    "img": "https://imgur.com/urZFKg0.png",
     "alt": "Square that represents a router."
   }
 ]
