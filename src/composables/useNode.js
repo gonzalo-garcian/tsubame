@@ -21,7 +21,8 @@ export function useNode() {
     /* CONSTANTS */
     const ANCHOR_OFFSET = 15;
     const ANCHOR_SIZE = 15;
-
+    const NODE_SIZE = 75;
+    /* CONSTANTS */
     let tempConnectionLine = new Konva.Line({
       stroke: "white",
       strokeWidth: 5,
@@ -176,14 +177,15 @@ export function useNode() {
       });
     }
 
+
     let hostL = new NetworkNode(ntype.toLowerCase());
     let host = new Konva.Rect({
       id: hostL.stringId,
       name: "rect",
-      x: x,
-      y: y,
-      width: 75,
-      height: 75,
+      x: x - NODE_SIZE / 2,
+      y: y - NODE_SIZE / 2,
+      width: NODE_SIZE,
+      height: NODE_SIZE,
       fill: color,
       draggable: true,
     });
