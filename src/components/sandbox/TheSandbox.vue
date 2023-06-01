@@ -25,4 +25,8 @@ onMounted(() => {
   grid-area: canvas-container;
   background-color: #282828;
 }
+
+#canvas:focus {
+  outline: none;
+}
 </style>

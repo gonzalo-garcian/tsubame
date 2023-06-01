@@ -31,6 +31,15 @@ export let useTopologyStore = defineStore("topology", {
     addNode(shape, node) {
       this.nodes.push({ shapeNode: shape, instanceNode: node });
     },
+    getAllNetworkConnections(networkId) {
+      let result = [];
+      this.connections.forEach((connection) => {
+        if (connection.to._id === networkId) {
+          result.push(connection.from);
+        }
+      });
+      return result;
+    },
     getNodeInstance(nodeId) {
       let result = null;
       this.nodes.forEach((node) => {

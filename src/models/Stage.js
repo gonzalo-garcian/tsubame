@@ -44,6 +44,24 @@ export class Stage {
     };
 
     let con = this.ref.container();
+
+    con.addEventListener("click", () => {
+      con.tabIndex = 0;
+      con.focus();
+    });
+
+    con.addEventListener("keydown", (e) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        let selectedNodes = this.tr.nodes();
+        console.log(selectedNodes);
+        selectedNodes.forEach((node) => {
+          node.deleteNode();
+        });
+
+        this.layer.batchDraw();
+      }
+    });
+
     con.addEventListener("dragover", (e) => {
       e.preventDefault();
     });
@@ -145,6 +163,7 @@ export class Stage {
 
     let shapes = this.ref.find(".rect");
     shapes = shapes.concat(this.ref.find(".network"));
+    shapes = shapes.concat(this.ref.find(".idText"));
     let box = this.selectionRectangle.getClientRect();
     let selected = shapes.filter((shape) =>
       Konva.Util.haveIntersection(box, shape.getClientRect())

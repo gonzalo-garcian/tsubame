@@ -42,7 +42,31 @@ export function useNode() {
     layer.add(tempAnchor);
 
     tempConnectionLine.setZIndex(0);
+
     function setEvents(eth, ethL) {
+      eth.deleteConnection = function () {
+        let connectionToRemove = null;
+
+        topology.connections.forEach((connection) => {
+          if (connection.from._id === this._id) {
+            connectionToRemove = connection;
+          }
+        });
+        if (connectionToRemove === null) {
+          return;
+        }
+
+        connectionToRemove.instanceEth.network = null;
+
+        connectionToRemove.networkInstance.removeNodeInterface(
+          connectionToRemove.instanceEth.mediaAccessControlAddress
+        );
+
+        connectionToRemove.line.remove();
+
+        topology.removeConnection(connectionToRemove.from._id);
+      };
+
       eth.on("mouseover", function () {
         stage.container().style.cursor = "grab";
       });
@@ -53,26 +77,7 @@ export function useNode() {
 
       eth.on("click", function (e) {
         if (e.evt.button === 2 && topology.connectionExists({ from: eth })) {
-          let connectionToRemove = null;
-
-          topology.connections.forEach((connection) => {
-            if (connection.from._id === eth._id) {
-              connectionToRemove = connection;
-            }
-          });
-          if (connectionToRemove === null) {
-            return;
-          }
-
-          connectionToRemove.instanceEth.network = null;
-
-          connectionToRemove.networkInstance.removeNodeInterface(
-            connectionToRemove.instanceEth.mediaAccessControlAddress
-          );
-
-          connectionToRemove.line.remove();
-
-          topology.removeConnection(connectionToRemove.from._id);
+          eth.deleteConnection();
         }
       });
 
@@ -183,12 +188,36 @@ export function useNode() {
       draggable: true,
     });
 
+    host.deleteNode = function () {
+      eth0.deleteConnection();
+      eth0.remove();
+      eth0L = null;
+
+      eth1.deleteConnection();
+      eth1.remove();
+      eth1L = null;
+
+      eth2.deleteConnection();
+      eth2.remove();
+      eth2L = null;
+
+      eth3.deleteConnection();
+      eth3.remove();
+      eth3L = null;
+
+      idText.remove();
+
+      host.remove();
+      hostL = null;
+    };
+
     topology.addNode(host, hostL);
     layer.add(host);
     console.log(topology.nodes);
 
     let idText = new Konva.Text({
       text: host.id(),
+      name: "idText",
       fontSize: 30,
       fontFamily: "Calibri",
       fill: "black",
@@ -211,6 +240,10 @@ export function useNode() {
       recalculateAnchorPosition();
       layer.batchDraw();
     });
+
+    idText.deleteNode = function () {
+      idText.remove();
+    };
 
     let eth0 = new Konva.Circle({
       name: "anchor",
@@ -358,6 +391,7 @@ export function useNode() {
 
     let idText = new Konva.Text({
       text: network.id(),
+      name: "idText",
       fontSize: 30,
       fontFamily: "Calibri",
       fill: "black",
@@ -379,6 +413,21 @@ export function useNode() {
       topology.updateConnections();
       layer.batchDraw();
     });
+
+    idText.deleteNode = function () {
+      idText.remove();
+    };
+
+    network.deleteNode = function () {
+      topology.getAllNetworkConnections(network._id).forEach((anchor) => {
+        anchor.deleteConnection();
+      });
+
+      networkL = null;
+      network.remove();
+
+      idText.remove();
+    };
 
     network.on("dragmove", function () {
       stage.container().style.cursor = "grabbing";
