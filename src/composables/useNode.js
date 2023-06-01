@@ -244,7 +244,7 @@ export function useNode() {
     });
 
     idText.deleteNode = function () {
-      idText.remove();
+      host.deleteNode();
     };
 
     let eth0 = new Konva.Circle({
@@ -417,7 +417,7 @@ export function useNode() {
     });
 
     idText.deleteNode = function () {
-      idText.remove();
+      network.deleteNode();
     };
 
     network.deleteNode = function () {

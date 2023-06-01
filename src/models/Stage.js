@@ -184,7 +184,7 @@ export class Stage {
     }
 
     // do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName("rect") && !e.target.hasName("network")) {
+    if (!e.target.hasName("rect") && !e.target.hasName("network") && !e.target.hasName("idText")) {
       return;
     }
 
