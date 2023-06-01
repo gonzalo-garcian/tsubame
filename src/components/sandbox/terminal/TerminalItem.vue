@@ -242,7 +242,9 @@ const executePing = async (params) => {
         {
           ERROR_LOG:
             "To use ping properly, make sure you're using a valid node and valid flags\nExample: ping -s H1 -d H2 -delay 2000\nFurther details--> " +
-            e,
+            e +
+            "\n You need to take into account the fact that the command ping uses a random eth (source and destination) from the host node selected, so \n" +
+            "in some cases the command could fail because there is no path between the selected interfaces.",
         },
       ],
     });

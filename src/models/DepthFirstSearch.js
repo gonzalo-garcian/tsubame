@@ -9,6 +9,7 @@ export class DepthFirstSearch {
    * se mirará para ese nodo que Interfaces tiene y si no están visitadas entonces se añaden al stack.
    */
   findPath(startNode, targetNode) {
+    console.log("Aquí empieza la fiesta");
     let stack = [[startNode, []]];
     let visited = new Set();
     console.log(startNode, targetNode);
@@ -60,7 +61,9 @@ export class DepthFirstSearch {
         }
       }
     }
-
+    console.log("Lo que buscas!.");
+    console.log(stack);
+    console.log(visited);
     return null;
   }
 }
