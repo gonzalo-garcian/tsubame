@@ -15,7 +15,11 @@ const startDrag = (e, nodeType) => {
 </script>
 
 <template>
-  <div class="node-item" draggable @dragstart="startDrag($event, node.name)">
+  <div
+    class="node-item"
+    draggable="true"
+    @dragstart="startDrag($event, node.name)"
+  >
     <img :src="node.img" :alt="node.alt" />
     <h1>{{ node.name }}</h1>
   </div>
