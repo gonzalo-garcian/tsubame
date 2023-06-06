@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* color palette from <https://github.com/vuejs/theme> */
+
+/*
 :root {
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
@@ -25,7 +26,6 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 }
 
-/* semantic color variables for this project */
 :root {
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
@@ -62,17 +62,29 @@
   position: relative;
   font-weight: normal;
 }
+*/
 
 body {
-  min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
-  transition: color 0.5s, background-color 0.5s;
-  line-height: 1.6;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 15px;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: #222222;
 }
+
+/* Custom scroll bar styles */
+body::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 4px;
+}
+
+body::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+/* Hide the up and down buttons on the scroll bar */
+body::-webkit-scrollbar-button {
+    display: none;
+}
+

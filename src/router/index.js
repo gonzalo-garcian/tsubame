@@ -1,21 +1,66 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import MainView from "@/views/main/MainView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      name: "home",
-      component: HomeView,
+      name: "main",
+      component: MainView,
+      children: [
+        {
+          path: "",
+          name: "home",
+
+          component: () => import("@/views/main/children/HomeView.vue"),
+        },
+        {
+          path: "/docs",
+          name: "docs",
+
+          component: () => import("@/views/main/children/DocsView.vue"),
+        },
+        {
+          path: "/blog",
+          name: "blog",
+
+          component: () => import("@/views/main/children/BlogView.vue"),
+        },
+        {
+          path: "/login",
+          name: "login",
+
+          component: () => import("@/views/LoginView.vue"),
+        },
+        {
+          path: "/signup",
+          name: "signup",
+
+          component: () => import("@/views/SignupView.vue"),
+        },
+      ],
     },
     {
-      path: "/about",
-      name: "about",
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import("../views/AboutView.vue"),
+      path: "/dashboard",
+      name: "dashboard",
+      redirect: "/projects",
+      component: () => import("@/views/dashboard/DashboardView.vue"),
+      children: [
+        {
+          path: "/projects",
+          name: "projects",
+
+          component: () =>
+            import("@/views/dashboard/children/ProjectsView.vue"),
+        },
+      ],
+    },
+    {
+      path: "/sandbox",
+      name: "sandbox",
+
+      component: () => import("@/views/SandboxView.vue"),
     },
   ],
 });
