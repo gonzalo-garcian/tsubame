@@ -16,24 +16,30 @@ const router = createRouter({
           component: () => import("@/views/main/children/HomeView.vue"),
         },
         {
-          path: "/about",
-          name: "about",
+          path: "/docs",
+          name: "docs",
 
-          component: () => import("@/views/main/children/AboutView.vue"),
+          component: () => import("@/views/main/children/DocsView.vue"),
+        },
+        {
+          path: "/blog",
+          name: "blog",
+
+          component: () => import("@/views/main/children/BlogView.vue"),
+        },
+        {
+          path: "/login",
+          name: "login",
+
+          component: () => import("@/views/LoginView.vue"),
+        },
+        {
+          path: "/signup",
+          name: "signup",
+
+          component: () => import("@/views/SignupView.vue"),
         },
       ],
-    },
-    {
-      path: "/login",
-      name: "login",
-
-      component: () => import("@/views/LoginView.vue"),
-    },
-    {
-      path: "/signup",
-      name: "signup",
-
-      component: () => import("@/views/SignupView.vue"),
     },
     {
       path: "/dashboard",

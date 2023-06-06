@@ -53,5 +53,19 @@ import { RouterLink } from "vue-router";
         </div>
       </div>
     </div>
+    <div class="relative mt-36">
+      <div class="container flex flex-row items-center justify-center">
+        <div class="flex flex-1 flex-col items-center">
+          <h1 class="text-3xl text-white font-bold">Create connections</h1>
+          <p class="text-gray-400 my-4 text-center sm">
+            Connect your hosts and routers to multiple logical networks. Use up
+            to four interfaces.
+          </p>
+        </div>
+        <div class="flex flex-1 justify-center z-10 mb-10">
+          <img class="w-5/6 h-5/6" src="https://imgur.com/LkRcUAM.gif" alt="" />
+        </div>
+      </div>
+    </div>
   </section>
 </template>

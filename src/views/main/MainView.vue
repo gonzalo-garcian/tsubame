@@ -16,7 +16,7 @@ import { RouterLink, RouterView } from "vue-router";
         Tsubame
       </RouterLink>
       <ul
-        class="hidden sm:flex flex-1 justify-end items-center gap-12 text-bookmark-blue text-xl font-mono text-white"
+        class="hidden sm:flex flex-1 justify-end items-center gap-12 text-bookmark-blue text-[15px] font-mono text-white"
       >
         <li class="cursor-pointer hover:text-purple-500">
           <RouterLink to="/about">Docs</RouterLink>
@@ -24,12 +24,30 @@ import { RouterLink, RouterView } from "vue-router";
         <li class="cursor-pointer hover:text-purple-500">
           <RouterLink to="/about">Blog</RouterLink>
         </li>
+
         <li class="cursor-pointer hover:text-purple-500">
           <div
             class="bg-purple-500 drop-shadow-personalize-down rounded-full px-3 py-1.5 drop-shadow-personalize-up text-white"
           >
             <RouterLink to="/sandbox">Sandbox</RouterLink>
           </div>
+        </li>
+        <li class="border-l-2 border-gray-50 pl-10 cursor-pointer hover:text-purple-500">
+          <RouterLink to="/login">Sign in</RouterLink>
+        </li>
+        <li class="cursor-pointer hover:text-purple-500">
+          <RouterLink to="/signup">Sign up</RouterLink>
+        </li>
+        <li class="cursor-pointer fill-teal-50">
+          <a href="https://github.com/">
+            <img
+              src="@/assets/github-mark.svg"
+              alt="Logo: GitHub"
+              width="20"
+              height="20"
+              class="inline-block grayscale"
+            />
+          </a>
         </li>
       </ul>
 
