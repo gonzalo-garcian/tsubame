@@ -1,5 +1,5 @@
 <script setup>
-import Project from "@/components/projects/ProjectItem.vue";
+import ProjectItem from "@/components/projects/ProjectItem.vue";
 
 defineProps({
   projects: Array,
@@ -8,10 +8,10 @@ defineProps({
 
 <template>
   <div>
-    <Project
+    <ProjectItem
       v-for="project in projects"
       :key="project.id"
       :name="project.name"
-    ></Project>
+    ></ProjectItem>
   </div>
 </template>

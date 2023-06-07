@@ -39,13 +39,13 @@ import { RouterLink, RouterView } from "vue-router";
           <RouterLink to="/signup">Sign up</RouterLink>
         </li>
         <li class="cursor-pointer fill-teal-50">
-          <a href="https://github.com/">
+          <a href="https://github.com/gonzalo-garcian/tsubame">
             <img
               src="@/assets/github-mark.svg"
               alt="Logo: GitHub"
               width="20"
               height="20"
-              class="inline-block grayscale"
+              class="inline-block"
             />
           </a>
         </li>

@@ -44,11 +44,11 @@ const router = createRouter({
     {
       path: "/dashboard",
       name: "dashboard",
-      redirect: "/projects",
+      redirect: "/dashboard/projects",
       component: () => import("@/views/dashboard/DashboardView.vue"),
       children: [
         {
-          path: "/projects",
+          path: "/dashboard/projects",
           name: "projects",
 
           component: () =>
