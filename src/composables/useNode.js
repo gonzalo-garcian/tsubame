@@ -46,6 +46,10 @@ export function useNode() {
     tempConnectionLine.setZIndex(0);
 
     function setEvents(eth, ethL) {
+      eth.setAttrs({
+        id: eth._id,
+      });
+
       eth.deleteConnection = function () {
         let connectionToRemove = null;
 
@@ -263,6 +267,7 @@ export function useNode() {
     });
 
     let eth0L = new Interface(null, hostL, "RIGHT");
+    topology.addAnchor(eth0, eth0L);
     hostL.addInterface(eth0L);
     setEvents(eth0, eth0L);
     layer.add(eth0);
@@ -278,6 +283,7 @@ export function useNode() {
     });
 
     let eth1L = new Interface(null, hostL, "DOWN");
+    topology.addAnchor(eth1, eth1L);
     setEvents(eth1, eth1L);
     hostL.addInterface(eth1L);
     layer.add(eth1);
@@ -293,6 +299,7 @@ export function useNode() {
     });
 
     let eth2L = new Interface(null, hostL, "LEFT");
+    topology.addAnchor(eth2, eth2L);
     hostL.addInterface(eth2L);
     setEvents(eth2, eth2L);
     layer.add(eth2);
@@ -308,6 +315,7 @@ export function useNode() {
     });
 
     let eth3L = new Interface(null, hostL, "UP");
+    topology.addAnchor(eth3, eth3L);
     hostL.addInterface(eth3L);
     setEvents(eth3, eth3L);
     layer.add(eth3);

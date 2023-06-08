@@ -3,6 +3,7 @@ import { supabase } from "@/composables/supabase";
 import { useUserStore } from "@/stores/useUser";
 import { useNode } from "@/composables/useNode";
 import { IdGenerator } from "@/models/IdGenerator";
+import Konva from "konva";
 
 export let useTopologyStore = defineStore("topology", {
   state() {
@@ -10,6 +11,7 @@ export let useTopologyStore = defineStore("topology", {
       networks: [],
       connections: [],
       nodes: [],
+      anchorsInterf: [],
       dropedNodeType: "",
     };
   },
@@ -22,7 +24,19 @@ export let useTopologyStore = defineStore("topology", {
         projectJSON["routerCount"] = new IdGenerator().router_id;
         console.log(projectJSON["routerCount"]);
         projectJSON["networkCount"] = new IdGenerator().network_id;
+        projectJSON["connections"] = [];
         console.log(projectJSON["networkCount"]);
+        this.connections.forEach((connection) => {
+          console.log("Conexiones: ");
+          console.log(connection);
+          projectJSON["connections"].push({
+            from: connection.from._id,
+            instanceEth: connection.instanceEth.mediaAccessControlAddress,
+            to: connection.to._id,
+            networkInstance: connection.networkInstance.id,
+            line: connection.line._id,
+          });
+        });
         console.log(projectJSON);
         projectJSON = JSON.stringify(projectJSON);
         const updates = {
@@ -84,8 +98,7 @@ export let useTopologyStore = defineStore("topology", {
               children.attrs.id
             );
           }
-        }
-        if (children.attrs.name === "network") {
+        } else if (children.attrs.name === "network") {
           useNode().createNetwork(
             stage,
             layer,
@@ -96,12 +109,70 @@ export let useTopologyStore = defineStore("topology", {
           );
         }
       });
+
+      stageCurrentProject["connections"].forEach((connection) => {
+        console.log("CONNECTION -->");
+        console.log(connection);
+        const networkConnected = this.networks.find(function (network) {
+          return network.instanceNetwork.id === connection.networkInstance;
+        });
+        const anchorConnected = this.anchorsInterf.find((
+          anchorInterf
+        )  => {
+          console.log(this.anchorsInterf);
+          console.log(anchorInterf.instanceAnchor.mediaAccessControlAddress);
+          console.log(connection.instanceEth);
+          return (
+            anchorInterf.instanceAnchor.mediaAccessControlAddress ===
+            connection.instanceEth
+          );
+        });
+        console.log(anchorConnected);
+
+        let connectionLine = new Konva.Line({
+          points: this.getConnectorPoints(
+            anchorConnected.shapeAnchor.position(),
+            networkConnected.shapeNetwork.position()
+          ),
+          stroke: "white",
+          strokeWidth: 5,
+          lineCap: "round",
+          lineJoin: "round",
+        });
+
+        if (
+          this.connectionExists({
+            from: anchorConnected.shapeAnchor,
+            to: networkConnected.shapeNetwork,
+          })
+        ) {
+          return;
+        }
+
+        anchorConnected.instanceAnchor.network =
+          networkConnected.instanceNetwork;
+        networkConnected.instanceNetwork.addNodeInterface(
+          anchorConnected.instanceAnchor
+        );
+        layer.add(connectionLine);
+        this.addConnection(
+          anchorConnected.shapeAnchor,
+          anchorConnected.instanceAnchor,
+          networkConnected.shapeNetwork,
+          networkConnected.instanceNetwork,
+          connectionLine
+        );
+      });
       new IdGenerator().host_id = stageCurrentProject["hostCount"];
       console.log(new IdGenerator().host_id);
       new IdGenerator().router_id = stageCurrentProject["routerCount"];
       console.log(new IdGenerator().router_id);
       new IdGenerator().network_id = stageCurrentProject["networkCount"];
       console.log(new IdGenerator().network_id);
+    },
+    addAnchor(shape, anchor) {
+      this.anchorsInterf.push({ shapeAnchor: shape, instanceAnchor: anchor });
+      console.log(this.anchorsInterf);
     },
     addConnection(
       shapeEth,
