@@ -4,7 +4,7 @@ import nodes from "@/stores/nodes.json";
 </script>
 
 <template>
-  <div class="node-menu">
+  <div class="node-menu border border-purple-400">
     <node-list :nodes="nodes" name="Network nodes"></node-list>
   </div>
 </template>

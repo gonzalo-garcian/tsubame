@@ -7,11 +7,10 @@ defineProps({
 </script>
 
 <template>
-  <div>
-    <ProjectItem
-      v-for="project in projects"
-      :key="project.id"
-      :name="project.name"
-    ></ProjectItem>
-  </div>
+  <ProjectItem
+    v-for="project in projects"
+    :key="project.id"
+    :id="project.id"
+    :name="project.name"
+  ></ProjectItem>
 </template>

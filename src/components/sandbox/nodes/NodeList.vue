@@ -8,8 +8,8 @@ defineProps({
 </script>
 
 <template>
-  <h1 class="title">{{ name }}</h1>
-  <div class="node-list">
+  <h1 class="text-white text-xl text-center font-mono font-bold border-b border-purple-400 p-2">{{ name }}</h1>
+  <div class="flex flex-wrap text-white text-lg text-center font-mono font-bold p-2">
     <node-item v-for="node in nodes" :key="node.id" :node="node"></node-item>
   </div>
 </template>
@@ -19,12 +19,5 @@ defineProps({
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-}
-
-.title {
-  color: white;
-  margin-bottom: 10px;
-  font-family: monospace;
-  font-size: 16px;
 }
 </style>

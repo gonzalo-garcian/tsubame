@@ -1,8 +1,12 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { Stage } from "@/models/Stage";
+import { useUserStore } from "@/stores/useUser";
+
+const project = ref();
 
 onMounted(() => {
+  project.value = useUserStore().currentProject;
   let stage = new Stage("canvas");
   window.addEventListener("resize", () => {
     const canvasContainer = document.querySelector(".canvas-container");
@@ -11,6 +15,8 @@ onMounted(() => {
       height: canvasContainer.offsetHeight,
     });
   });
+
+  console.log(project.value);
 });
 </script>
 

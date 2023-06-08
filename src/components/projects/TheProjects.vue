@@ -2,12 +2,14 @@
 import ProjectList from "@/components/projects/ProjectList.vue";
 import { supabase } from "@/composables/supabase";
 import { onMounted, ref } from "vue";
+import { useUserStore } from "@/stores/useUser";
 const session = ref();
 const projects = ref();
 
 onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
     session.value = data.session;
+    useUserStore().id = session.value.user.id;
     getProjects();
   });
 
@@ -22,7 +24,7 @@ async function getProjects() {
 
     let { data, error, status } = await supabase
       .from("projects")
-      .select(`id, name, data`)
+      .select(`id, name`)
       .eq("user_id", user.id);
 
     if (error && status !== 406) throw error;
@@ -38,5 +40,12 @@ async function getProjects() {
 </script>
 
 <template>
-  <ProjectList :projects="projects"></ProjectList>
+  <div class="flex flex-row flex-wrap gap-10 mx-10 mt-10">
+    <div
+      class="text-xl border border-purple-400 p-10 border-dashed text-white cursor-pointer"
+    >
+      New project
+    </div>
+    <ProjectList :projects="projects"></ProjectList>
+  </div>
 </template>

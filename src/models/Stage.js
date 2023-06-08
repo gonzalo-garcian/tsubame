@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { useNode } from "@/composables/useNode";
 import { useTopologyStore } from "@/stores/useTopology";
+import { useUserStore } from "@/stores/useUser";
 
 let topology = useTopologyStore();
 
@@ -15,6 +16,14 @@ export class Stage {
 
     this.layer = new Konva.Layer();
     this.ref.add(this.layer);
+
+    if (useUserStore().currentProject !== null) {
+      if (useUserStore().currentProject[0].data) {
+        console.log("EFECTIVAMENTE HAY COSAS");
+        useTopologyStore().loadProject(this.ref, this.layer);
+        console.log(useUserStore().currentProject[0]);
+      }
+    }
 
     /*useNode().createHost(this.ref, this.layer, 120, 30, "red");
     useNode().createHost(this.ref, this.layer, 500, 500, "green");
@@ -51,7 +60,7 @@ export class Stage {
     });
 
     con.addEventListener("keydown", (e) => {
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (e.key === "Delete" || e.key === "Backspace") {
         let selectedNodes = this.tr.nodes();
         console.log(selectedNodes);
         selectedNodes.forEach((node) => {
@@ -59,6 +68,9 @@ export class Stage {
         });
 
         this.layer.batchDraw();
+      } else if (e.ctrlKey && e.key === "s") {
+        e.preventDefault();
+        useTopologyStore().saveProject(this.ref);
       }
     });
 
@@ -184,7 +196,11 @@ export class Stage {
     }
 
     // do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName("rect") && !e.target.hasName("network") && !e.target.hasName("idText")) {
+    if (
+      !e.target.hasName("rect") &&
+      !e.target.hasName("network") &&
+      !e.target.hasName("idText")
+    ) {
       return;
     }
 

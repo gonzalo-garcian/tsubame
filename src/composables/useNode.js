@@ -16,7 +16,8 @@ export function useNode() {
     color = "red",
     anchorColor = "white",
     selectedAnchorColor = "green",
-    ntype = "host"
+    ntype = "host",
+    id = null
   ) {
     /* CONSTANTS */
     const ANCHOR_OFFSET = 15;
@@ -177,10 +178,14 @@ export function useNode() {
       });
     }
 
-
-    let hostL = new NetworkNode(ntype.toLowerCase());
+    let hostLIdString =
+      ntype[0].toUpperCase() +
+      (ntype === "host"
+        ? new IdGenerator().generateHostId()
+        : new IdGenerator().generateRouterId());
+    let hostL = new NetworkNode(ntype.toLowerCase(), hostLIdString);
     let host = new Konva.Rect({
-      id: hostL.stringId,
+      id: id === null ? hostLIdString : id,
       name: "rect",
       x: x - NODE_SIZE / 2,
       y: y - NODE_SIZE / 2,
@@ -376,9 +381,9 @@ export function useNode() {
     });
   }
 
-  function createNetwork(stage, layer, x, y, color = "yellow") {
+  function createNetwork(stage, layer, x, y, color = "yellow", id = null) {
     let network = new Konva.Circle({
-      id: "N" + new IdGenerator().generateNetworkId(),
+      id: id === null ? "N" + new IdGenerator().generateNetworkId() : id,
       name: "network",
       x: x,
       y: y,

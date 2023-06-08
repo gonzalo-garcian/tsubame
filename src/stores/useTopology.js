@@ -1,4 +1,8 @@
 import { defineStore } from "pinia";
+import { supabase } from "@/composables/supabase";
+import { useUserStore } from "@/stores/useUser";
+import { useNode } from "@/composables/useNode";
+import { IdGenerator } from "@/models/IdGenerator";
 
 export let useTopologyStore = defineStore("topology", {
   state() {
@@ -10,6 +14,95 @@ export let useTopologyStore = defineStore("topology", {
     };
   },
   actions: {
+    async saveProject(stage) {
+      try {
+        let projectJSON = JSON.parse(stage.toJSON());
+        projectJSON["hostCount"] = new IdGenerator().host_id;
+        console.log(projectJSON["hostCount"]);
+        projectJSON["routerCount"] = new IdGenerator().router_id;
+        console.log(projectJSON["routerCount"]);
+        projectJSON["networkCount"] = new IdGenerator().network_id;
+        console.log(projectJSON["networkCount"]);
+        console.log(projectJSON);
+        projectJSON = JSON.stringify(projectJSON);
+        const updates = {
+          id: useUserStore().currentProject[0].id,
+          user_id: useUserStore().id,
+          data: projectJSON,
+        };
+
+        let { error } = await supabase.from("projects").upsert(updates);
+
+        if (error) throw error;
+      } catch (error) {
+        console.log(error.message);
+        console.log(useUserStore().id);
+        alert(useUserStore().id);
+      }
+    },
+    loadProject(stage, layer) {
+      console.log("STRING JSON: ");
+      console.log(useUserStore().currentProject);
+      const stageCurrentProject = JSON.parse(
+        useUserStore().currentProject[0].data
+      );
+
+      console.log("JSON: ");
+      console.log(stageCurrentProject);
+      const layerCurrentProject =
+        stageCurrentProject["children"][0]["children"];
+      layerCurrentProject.forEach((children) => {
+        console.log("LOS CHILDREN");
+        console.log(children);
+
+        if (children.attrs.name === "rect") {
+          const NODE_SIZE = 75;
+          const x = children.attrs.x + NODE_SIZE / 2;
+          const y = children.attrs.y + NODE_SIZE / 2;
+          if (children.attrs.id[0] === "H") {
+            useNode().createHost(
+              stage,
+              layer,
+              x,
+              y,
+              "red",
+              "white",
+              "green",
+              "host",
+              children.attrs.id
+            );
+          } else if (children.attrs.id[0] === "R") {
+            useNode().createHost(
+              stage,
+              layer,
+              x,
+              y,
+              "orange",
+              "white",
+              "green",
+              "router",
+              children.attrs.id
+            );
+          }
+        }
+        if (children.attrs.name === "network") {
+          useNode().createNetwork(
+            stage,
+            layer,
+            children.attrs.x,
+            children.attrs.y,
+            "yellow",
+            children.attrs.id
+          );
+        }
+      });
+      new IdGenerator().host_id = stageCurrentProject["hostCount"];
+      console.log(new IdGenerator().host_id);
+      new IdGenerator().router_id = stageCurrentProject["routerCount"];
+      console.log(new IdGenerator().router_id);
+      new IdGenerator().network_id = stageCurrentProject["networkCount"];
+      console.log(new IdGenerator().network_id);
+    },
     addConnection(
       shapeEth,
       instanceEth,

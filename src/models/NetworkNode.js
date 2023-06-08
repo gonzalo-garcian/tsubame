@@ -1,13 +1,9 @@
 import crypto from "crypto";
 import { IdGenerator } from "@/models/IdGenerator";
 export class NetworkNode {
-  constructor(type) {
+  constructor(type, idString) {
     this.id = new IdGenerator().generateId();
-    this.stringId =
-      type[0].toUpperCase() +
-      (type === "host"
-        ? new IdGenerator().generateHostId()
-        : new IdGenerator().generateRouterId());
+    this.stringId = idString;
     this.type = type;
     this.interfaces = [];
   }

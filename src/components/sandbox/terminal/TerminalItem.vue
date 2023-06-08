@@ -1,7 +1,13 @@
 <template>
-  <div class="terminal" @click="focusInput" @keydown="handleKeyDown">
-    <div class="terminal-header">Network terminal</div>
-    <div class="terminal-body" ref="terminalBody">
+  <div
+    class="terminal border-l border-t border-r border-purple-400"
+    @click="focusInput"
+    @keydown="handleKeyDown"
+  >
+    <div class="terminal-header bg-[#303030] w-full border-b border-purple-400">
+      <h1 class="text-white text-lg font-mono font-bold p-2">Terminal</h1>
+    </div>
+    <div class="terminal-body bg-[#181818] pt-1 pl-2" ref="terminalBody">
       <div
         v-for="(result, index) in results"
         :key="index"
@@ -9,13 +15,14 @@
       >
         <span class="terminal-prompt">user@terminal:~$</span>
         <span class="terminal-command">{{ result.command }}</span>
-        <br />
-        <component
-          v-for="(data, index) in result.dataList"
-          :key="index"
-          :is="result.type"
-          :data="data"
-        />
+        <div class="pt-5">
+          <component
+            v-for="(data, index) in result.dataList"
+            :key="index"
+            :is="result.type"
+            :data="data"
+          />
+        </div>
       </div>
       <div class="terminal-input-container">
         <span class="terminal-prompt" v-if="!isExecCommand"
@@ -32,6 +39,69 @@
     </div>
   </div>
 </template>
+
+<style scoped>
+.terminal {
+  height: 300px;
+  background-color: #303030;
+  color: white;
+  font-family: monospace;
+  grid-area: terminal;
+}
+
+.terminal-header {
+  font-size: 16px;
+  margin: 0;
+}
+
+.terminal-body {
+  height: 250px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.terminal-line {
+  white-space: pre-wrap;
+}
+
+.terminal-prompt {
+  color: #9370db;
+  margin-right: 5px;
+}
+
+.terminal-command {
+  color: #fff;
+}
+
+.terminal-input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  caret-shape: block;
+  width: 50%;
+}
+
+/* Custom scroll bar styles */
+.terminal-body::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Hide the up and down buttons on the scroll bar */
+.terminal-body::-webkit-scrollbar-button {
+  display: none;
+}
+</style>
 
 <script setup>
 import { nextTick, onMounted, ref } from "vue";
@@ -260,66 +330,3 @@ onMounted(() => {
   scrollTerminalToBottom();
 });
 </script>
-
-<style scoped>
-.terminal {
-  height: 300px;
-  background-color: #303030;
-  color: white;
-  font-family: monospace;
-  padding: 10px;
-  grid-area: terminal;
-}
-
-.terminal-header {
-  font-size: 16px;
-}
-
-.terminal-body {
-  height: 250px;
-  overflow-y: auto;
-  font-size: 14px;
-}
-
-.terminal-line {
-  white-space: pre-wrap;
-}
-
-.terminal-prompt {
-  color: #9370db;
-  margin-right: 5px;
-}
-
-.terminal-command {
-  color: #fff;
-}
-
-.terminal-input {
-  background-color: transparent;
-  border: none;
-  outline: none;
-  color: #fff;
-  caret-shape: block;
-  width: 50%;
-}
-
-/* Custom scroll bar styles */
-.terminal-body::-webkit-scrollbar {
-  width: 8px;
-  background-color: transparent;
-}
-
-.terminal-body::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.4);
-  border-radius: 4px;
-}
-
-.terminal-body::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
-/* Hide the up and down buttons on the scroll bar */
-.terminal-body::-webkit-scrollbar-button {
-  display: none;
-}
-</style>
