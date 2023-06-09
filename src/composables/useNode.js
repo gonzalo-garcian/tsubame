@@ -138,7 +138,7 @@ export function useNode() {
             intersectedObj = obj;
           }
         });
-        console.log(intersectedObj);
+          
 
         tempAnchor.visible(false);
         tempConnectionLine.visible(false);
@@ -224,7 +224,7 @@ export function useNode() {
 
     topology.addNode(host, hostL);
     layer.add(host);
-    console.log(topology.nodes);
+      
 
     let idText = new Konva.Text({
       text: host.id(),

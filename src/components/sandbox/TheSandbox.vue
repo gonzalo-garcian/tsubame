@@ -16,7 +16,7 @@ onMounted(() => {
     });
   });
 
-  console.log(project.value);
+
 });
 </script>
 

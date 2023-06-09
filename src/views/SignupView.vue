@@ -20,10 +20,10 @@ const handleLogin = async () => {
       },
     });
     if (error) throw error;
-    alert("Check your email for the login link!");
+    console.log("Check your email for the login link!");
   } catch (error) {
     if (error instanceof Error) {
-      alert(error.message);
+      console.log(error.message);
     }
   } finally {
     loading.value = false;

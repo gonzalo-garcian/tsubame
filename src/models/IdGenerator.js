@@ -14,11 +14,11 @@ export class IdGenerator {
     return this.id++;
   }
   generateHostId() {
-    console.log(this.host_id);
+      
     return this.host_id++;
   }
   generateRouterId() {
-    console.log(this.router_id);
+      
     return this.router_id++;
   }
   generateNetworkId() {

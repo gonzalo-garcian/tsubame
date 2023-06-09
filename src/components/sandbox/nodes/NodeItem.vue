@@ -10,7 +10,7 @@ let topology = useTopologyStore();
 const startDrag = (e, nodeType) => {
   //e.preventDefault();
   topology.dropedNodeType = nodeType;
-  console.log(topology.dropedNodeType);
+
 };
 </script>
 

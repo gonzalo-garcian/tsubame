@@ -13,22 +13,24 @@ export let useTopologyStore = defineStore("topology", {
       nodes: [],
       anchorsInterf: [],
       dropedNodeType: "",
+      stageRef: null,
     };
   },
   actions: {
-    async saveProject(stage) {
+    async saveProject() {
       try {
+        const stage = this.stageRef;
         let projectJSON = JSON.parse(stage.toJSON());
         projectJSON["hostCount"] = new IdGenerator().host_id;
-        console.log(projectJSON["hostCount"]);
+          
         projectJSON["routerCount"] = new IdGenerator().router_id;
-        console.log(projectJSON["routerCount"]);
+          
         projectJSON["networkCount"] = new IdGenerator().network_id;
         projectJSON["connections"] = [];
-        console.log(projectJSON["networkCount"]);
+          
         this.connections.forEach((connection) => {
-          console.log("Conexiones: ");
-          console.log(connection);
+            
+            
           projectJSON["connections"].push({
             from: connection.from._id,
             instanceEth: connection.instanceEth.mediaAccessControlAddress,
@@ -37,7 +39,7 @@ export let useTopologyStore = defineStore("topology", {
             line: connection.line._id,
           });
         });
-        console.log(projectJSON);
+          
         projectJSON = JSON.stringify(projectJSON);
         const updates = {
           id: useUserStore().currentProject[0].id,
@@ -49,25 +51,23 @@ export let useTopologyStore = defineStore("topology", {
 
         if (error) throw error;
       } catch (error) {
-        console.log(error.message);
-        console.log(useUserStore().id);
-        alert(useUserStore().id);
+        console.log(error);
       }
     },
     loadProject(stage, layer) {
-      console.log("STRING JSON: ");
-      console.log(useUserStore().currentProject);
+        
+        
       const stageCurrentProject = JSON.parse(
         useUserStore().currentProject[0].data
       );
 
-      console.log("JSON: ");
-      console.log(stageCurrentProject);
+        
+        
       const layerCurrentProject =
         stageCurrentProject["children"][0]["children"];
       layerCurrentProject.forEach((children) => {
-        console.log("LOS CHILDREN");
-        console.log(children);
+          
+          
 
         if (children.attrs.name === "rect") {
           const NODE_SIZE = 75;
@@ -111,23 +111,23 @@ export let useTopologyStore = defineStore("topology", {
       });
 
       stageCurrentProject["connections"].forEach((connection) => {
-        console.log("CONNECTION -->");
-        console.log(connection);
+          
+          
         const networkConnected = this.networks.find(function (network) {
           return network.instanceNetwork.id === connection.networkInstance;
         });
         const anchorConnected = this.anchorsInterf.find((
           anchorInterf
         )  => {
-          console.log(this.anchorsInterf);
-          console.log(anchorInterf.instanceAnchor.mediaAccessControlAddress);
-          console.log(connection.instanceEth);
+            
+            
+            
           return (
             anchorInterf.instanceAnchor.mediaAccessControlAddress ===
             connection.instanceEth
           );
         });
-        console.log(anchorConnected);
+          
 
         let connectionLine = new Konva.Line({
           points: this.getConnectorPoints(
@@ -164,15 +164,15 @@ export let useTopologyStore = defineStore("topology", {
         );
       });
       new IdGenerator().host_id = stageCurrentProject["hostCount"];
-      console.log(new IdGenerator().host_id);
+        
       new IdGenerator().router_id = stageCurrentProject["routerCount"];
-      console.log(new IdGenerator().router_id);
+        
       new IdGenerator().network_id = stageCurrentProject["networkCount"];
-      console.log(new IdGenerator().network_id);
+        
     },
     addAnchor(shape, anchor) {
       this.anchorsInterf.push({ shapeAnchor: shape, instanceAnchor: anchor });
-      console.log(this.anchorsInterf);
+        
     },
     addConnection(
       shapeEth,
@@ -216,7 +216,7 @@ export let useTopologyStore = defineStore("topology", {
     getNodeInstanceByStringId(nodeStringId) {
       let result = null;
       this.nodes.forEach((node) => {
-        console.log(node.shapeNode.id());
+          
         if (node.shapeNode.id() === nodeStringId) {
           result = node.instanceNode;
         }

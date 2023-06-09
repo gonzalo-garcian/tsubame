@@ -3,11 +3,14 @@ defineProps(["data"]);
 </script>
 
 <template>
-  <p>{{ data.ERROR_LOG }}</p>
+  <p :class="data.COLOR">{{ data.ERROR_LOG }}</p>
 </template>
 
 <style scoped>
-p {
+.text-red {
   color: indianred;
+}
+.text-green {
+  color: darkseagreen;
 }
 </style>

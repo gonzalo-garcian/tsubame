@@ -2,6 +2,11 @@
 import TheSandbox from "@/components/sandbox/TheSandbox.vue";
 import TheComponents from "@/components/sandbox/nodes/TheNodes.vue";
 import TheTerminal from "@/components/sandbox/terminal/TerminalItem.vue";
+import { onBeforeUnmount } from "vue";
+
+onBeforeUnmount(() => {
+  location.reload();
+});
 </script>
 
 <template>

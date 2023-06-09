@@ -10,16 +10,20 @@ const password = ref("");
 const handleLogin = async () => {
   try {
     loading.value = true;
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
-    });
-    if (error) throw error;
-
-    await router.push("/dashboard");
+    const { error } = await supabase.auth
+      .signInWithPassword({
+        email: email.value,
+        password: password.value,
+      })
+      .catch((e) => console.log(e));
+    if (error) {
+      console.log(error);
+    } else {
+      await router.push("/dashboard");
+    }
   } catch (error) {
     if (error instanceof Error) {
-      alert(error.message);
+      console.log(error);
     }
   } finally {
     loading.value = false;
@@ -35,7 +39,7 @@ const handleLogin = async () => {
       <h1
         class="text-bookmark-blue text-6xl px-[200px] text-white font-bold text-center mb-20"
       >
-        Sign In
+        Log In
       </h1>
       <div
         class="w-full rounded-lg shadow border max-w-md p-0 bg-gray-700 border-gray-700 drop-shadow-personalize-up"
@@ -101,13 +105,11 @@ const handleLogin = async () => {
               type="submit"
               class="w-full text-white bg-purple-500 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             >
-              Sign in
+              Log In
             </button>
             <p class="text-sm font-light text-white">
               Don’t have an account yet?
-              <a
-                href="/dashboard"
-                class="font-medium text-white hover:underline"
+              <a href="/signup" class="font-medium text-white hover:underline"
                 >Sign up</a
               >
             </p>

@@ -109,6 +109,7 @@ import { DepthFirstSearch } from "@/models/DepthFirstSearch";
 import { useTopologyStore } from "@/stores/useTopology";
 import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
 import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue";
+import router from "@/router";
 
 let topology = useTopologyStore();
 
@@ -136,7 +137,6 @@ const handleKeyDown = (event) => {
     if (commandRecordIndex > 0) {
       commandRecordIndex--;
       currentCommand.value = commandRecord[commandRecordIndex];
-      console.log(commandRecord);
     }
   }
   if (event.key === "ArrowDown") {
@@ -144,7 +144,6 @@ const handleKeyDown = (event) => {
     if (commandRecordIndex < commandRecord.length) {
       commandRecordIndex++;
       currentCommand.value = commandRecord[commandRecordIndex];
-      console.log(commandRecord);
     }
   }
 };
@@ -156,6 +155,10 @@ const clearTerminalOutput = () => {
 const executeCommand = () => {
   if (currentCommand.value.trim() !== "") {
     let commands = {
+      exit: executeExit,
+      save: executeSaveProject,
+      clear: executeClear,
+      rm: executeRemoveNode,
       ping: executePing,
       help: executeHelp,
     };
@@ -187,6 +190,37 @@ const sleep = (delay) => {
   return new Promise((resolve) => setTimeout(resolve, delay));
 };
 
+const executeExit = async () => {
+  await router.push("/dashboard").then(() => (isExecCommand.value = false));
+};
+
+const executeClear = () => {
+  clearTerminalOutput();
+  isExecCommand.value = false;
+};
+
+const executeSaveProject = () => {
+  useTopologyStore()
+    .saveProject()
+    .then(() => {
+      results.value.push({
+        command: currentCommand.value,
+        type: ErrorLogItem,
+        dataList: [
+          {
+            ERROR_LOG: "Project saved correctly.",
+            COLOR: "text-green",
+          },
+        ],
+      });
+      isExecCommand.value = false;
+    });
+};
+
+const executeRemoveNode = () => {
+  isExecCommand.value = false;
+};
+
 const executeHelp = () => {
   results.value.push({
     command: currentCommand.value,
@@ -197,6 +231,7 @@ const executeHelp = () => {
           "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  " +
           "\n-d: a que nodo se quiere enviar" +
           "\n-delay: número en milisegundos que la trama tarda en aparecer",
+        COLOR: "text-red",
       },
     ],
   });
@@ -204,7 +239,9 @@ const executeHelp = () => {
 };
 const executePing = async (params) => {
   let source = "";
+  let sEth;
   let destination = "";
+  let dEth;
   let delay = 0;
 
   results.value.push({
@@ -219,42 +256,53 @@ const executePing = async (params) => {
 
   for (let i = 0; i < params.length; i++) {
     if (params[i] === "-s" && !isFlag(params[i + 1])) {
+      if (params[i + 2] === "-eth" && !isFlag(params[i + 3])) {
+        sEth = params[i + 3];
+      }
       source = params[i + 1];
     } else if (params[i] === "-d" && !isFlag(params[i + 1])) {
+      if (params[i + 2] === "-eth" && !isFlag(params[i + 3])) {
+        dEth = params[i + 3];
+      }
       destination = params[i + 1];
     } else if (params[i] === "-delay" && !isFlag(params[i + 1])) {
       delay = parseInt(params[i + 1]);
     }
   }
-
-  console.log("NODO_S -> " + source);
-  console.log(topology.getNodeInstanceByStringId(source));
-
-  console.log("NODO_D -> " + destination);
-  console.log(topology.getNodeInstanceByStringId(destination));
-
   try {
     //Get randomly one interface with connection.
     let interfaceSource = topology.getNodeInstanceByStringId(source).interfaces;
     interfaceSource = interfaceSource.filter((cInterface) => {
       return cInterface.network !== null;
     });
-    console.log(interfaceSource);
-    interfaceSource =
-      interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
-    console.log(interfaceSource);
+
+    if (sEth) {
+      interfaceSource = interfaceSource.find(
+        (e) => e.direction === sEth
+      );
+      console.log(sEth);
+    } else {
+      interfaceSource =
+        interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
+    }
 
     let interfaceDestination =
       topology.getNodeInstanceByStringId(destination).interfaces;
     interfaceDestination = interfaceDestination.filter((cInterface) => {
       return cInterface.network !== null;
     });
-    console.log(interfaceDestination);
-    interfaceDestination =
-      interfaceDestination[
-        Math.floor(Math.random() * interfaceDestination.length)
-      ];
-    console.log(interfaceDestination);
+
+    if (dEth) {
+      interfaceDestination = interfaceDestination.find(
+        (e) => e.direction === dEth
+      );
+      console.log(dEth);
+    } else {
+      interfaceDestination =
+        interfaceDestination[
+          Math.floor(Math.random() * interfaceDestination.length)
+        ];
+    }
 
     let path = DFS.findPath(interfaceSource, interfaceDestination);
 
@@ -315,6 +363,7 @@ const executePing = async (params) => {
             e +
             "\n You need to take into account the fact that the command ping uses a random eth (source and destination) from the host node selected, so \n" +
             "in some cases the command could fail because there is no path between the selected interfaces.",
+          COLOR: "text-red",
         },
       ],
     });

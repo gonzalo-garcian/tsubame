@@ -30,7 +30,7 @@ const getProject = async () => {
         await router.push("/sandbox");
       }
     } catch (e) {
-      console.log(e);
+
     }
   });
 };

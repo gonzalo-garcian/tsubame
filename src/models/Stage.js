@@ -14,14 +14,16 @@ export class Stage {
       height: canvasContainer.offsetHeight,
     });
 
+    useTopologyStore().stageRef = this.ref;
+
     this.layer = new Konva.Layer();
     this.ref.add(this.layer);
 
     if (useUserStore().currentProject !== null) {
       if (useUserStore().currentProject[0].data) {
-        console.log("EFECTIVAMENTE HAY COSAS");
+          
         useTopologyStore().loadProject(this.ref, this.layer);
-        console.log(useUserStore().currentProject[0]);
+          
       }
     }
 
@@ -62,7 +64,7 @@ export class Stage {
     con.addEventListener("keydown", (e) => {
       if (e.key === "Delete" || e.key === "Backspace") {
         let selectedNodes = this.tr.nodes();
-        console.log(selectedNodes);
+          
         selectedNodes.forEach((node) => {
           node.deleteNode();
         });
@@ -70,7 +72,7 @@ export class Stage {
         this.layer.batchDraw();
       } else if (e.ctrlKey && e.key === "s") {
         e.preventDefault();
-        useTopologyStore().saveProject(this.ref);
+        useTopologyStore().saveProject();
       }
     });
 
@@ -80,11 +82,11 @@ export class Stage {
 
     con.addEventListener("drop", (e) => {
       e.preventDefault();
-      console.log(this.ref);
+        
       this.ref.setPointersPositions(e);
       let pointer = this.ref.getRelativePointerPosition();
       let option = topology.dropedNodeType;
-      console.log(option);
+        
       switch (option) {
         case "Host":
           useNode().createHost(this.ref, this.layer, pointer.x, pointer.y);

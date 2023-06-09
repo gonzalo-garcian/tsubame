@@ -9,10 +9,10 @@ export class DepthFirstSearch {
    * se mirará para ese nodo que Interfaces tiene y si no están visitadas entonces se añaden al stack.
    */
   findPath(startNode, targetNode) {
-    console.log("Aquí empieza la fiesta");
+      
     let stack = [[startNode, []]];
     let visited = new Set();
-    console.log(startNode, targetNode);
+      
     while (stack.length > 0) {
       let [currentNodeInterface, currentPath] = stack.pop();
 
@@ -20,9 +20,9 @@ export class DepthFirstSearch {
         currentNodeInterface.mediaAccessControlAddress ===
         targetNode.mediaAccessControlAddress
       ) {
-        console.log(currentNodeInterface);
+          
         currentPath = currentPath.concat(currentNodeInterface);
-        console.log(currentPath);
+          
         return currentPath;
       }
 
@@ -40,10 +40,10 @@ export class DepthFirstSearch {
               gateway.mediaAccessControlAddress ===
               targetNode.mediaAccessControlAddress
             ) {
-              console.log(gateway);
+                
               currentPath = currentPath.concat(currentNodeInterface);
               currentPath = currentPath.concat(gateway);
-              console.log(currentPath);
+                
               return currentPath;
             }
 
@@ -61,9 +61,9 @@ export class DepthFirstSearch {
         }
       }
     }
-    console.log("Lo que buscas!.");
-    console.log(stack);
-    console.log(visited);
+      
+      
+      
     return null;
   }
 }

@@ -33,7 +33,7 @@ import { RouterLink, RouterView } from "vue-router";
           </div>
         </li>
         <li class="border-l-2 border-gray-50 pl-10 cursor-pointer hover:text-purple-500">
-          <RouterLink to="/login">Sign in</RouterLink>
+          <RouterLink to="/login">Log In</RouterLink>
         </li>
         <li class="cursor-pointer hover:text-purple-500">
           <RouterLink to="/signup">Sign up</RouterLink>

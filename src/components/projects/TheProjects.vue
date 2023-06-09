@@ -31,10 +31,9 @@ async function getProjects() {
 
     if (data) {
       projects.value = data;
-      console.log(projects.value);
     }
   } catch (error) {
-    alert(error.message);
+    console.log(error);
   }
 }
 </script>
