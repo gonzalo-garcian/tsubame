@@ -110,6 +110,7 @@ import { useTopologyStore } from "@/stores/useTopology";
 import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
 import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue";
 import router from "@/router";
+import TCPItem from "@/components/sandbox/terminal/results/TCPItem.vue";
 
 let topology = useTopologyStore();
 
@@ -160,6 +161,7 @@ const executeCommand = () => {
       clear: executeClear,
       rm: executeRemoveNode,
       ping: executePing,
+      tcp: executeTCP,
       help: executeHelp,
     };
 
@@ -237,19 +239,14 @@ const executeHelp = () => {
   });
   isExecCommand.value = false;
 };
-const executePing = async (params) => {
-  let source = "";
-  let sEth;
-  let destination = "";
-  let dEth;
-  let delay = 0;
 
-  results.value.push({
-    command: currentCommand.value,
-    type: PingItem,
-    dataList: [],
-  });
-
+const getRouting = (params) => {
+  let source,
+    sEth,
+    destination,
+    dEth,
+    delay = 0,
+    message = "";
   function isFlag(param) {
     return param.includes("-");
   }
@@ -267,44 +264,196 @@ const executePing = async (params) => {
       destination = params[i + 1];
     } else if (params[i] === "-delay" && !isFlag(params[i + 1])) {
       delay = parseInt(params[i + 1]);
+    } else if (params[i] === "-msg" && !isFlag(params[i + 1])) {
+      message = params[i + 1];
     }
   }
+  //Get randomly one interface with connection.
+  let interfaceSource = topology.getNodeInstanceByStringId(source).interfaces;
+  interfaceSource = interfaceSource.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+
+  if (sEth) {
+    interfaceSource = interfaceSource.find((e) => e.direction === sEth);
+    console.log(sEth);
+  } else {
+    interfaceSource =
+      interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
+  }
+
+  let interfaceDestination =
+    topology.getNodeInstanceByStringId(destination).interfaces;
+  interfaceDestination = interfaceDestination.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+
+  if (dEth) {
+    interfaceDestination = interfaceDestination.find(
+      (e) => e.direction === dEth
+    );
+    console.log(dEth);
+  } else {
+    interfaceDestination =
+      interfaceDestination[
+        Math.floor(Math.random() * interfaceDestination.length)
+      ];
+  }
+
+  let path = DFS.findPath(interfaceSource, interfaceDestination);
+
+  return { delay, message, path };
+};
+
+const addResult = async (result, delay) => {
+  await sleep(delay);
+  results.value[results.value.length - 1].dataList.push(result);
+  nextTick().then(() => scrollTerminalToBottom());
+};
+
+const addLog = (text, color) => {
+  results.value.push({
+    command: currentCommand.value,
+    type: ErrorLogItem,
+    dataList: [
+      {
+        ERROR_LOG: text,
+        COLOR: "text-" + color,
+      },
+    ],
+  });
+};
+
+const addReqTCP = async (
+  path,
+  delay,
+  REQ_TTL,
+  REQ_SEQ,
+  REQ_ACK,
+  FLAGS,
+  MESSAGE = ""
+) => {
+  for (let j = 0; j < path.length; j += 2) {
+    const result = {
+      MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+      MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+      IP_D:
+        path[path.length - 1].father.stringId +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      TTL: --REQ_TTL,
+      PROTOCOL_IP: "TCP",
+      PORT_S: "8080",
+      PORT_D: "80",
+      SEQ: REQ_SEQ,
+      ACK: REQ_ACK,
+      FLAGS: FLAGS,
+      MESSAGE: MESSAGE,
+    };
+
+    await addResult(result, delay);
+  }
+};
+
+const addResTCP = async (
+  path,
+  delay,
+  REQ_TTL,
+  REQ_SEQ,
+  REQ_ACK,
+  FLAGS,
+  MESSAGE = ""
+) => {
+  for (let j = path.length - 1; j > 0; j -= 2) {
+    const result = {
+      MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+      MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S:
+        path[path.length - 1].father.stringId +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+      TTL: --REQ_TTL,
+      PROTOCOL_IP: "TCP",
+      PORT_S: "80",
+      PORT_D: "8080",
+      SEQ: REQ_SEQ,
+      ACK: REQ_ACK,
+      FLAGS: FLAGS,
+      MESSAGE: MESSAGE,
+    };
+    await addResult(result, delay);
+  }
+};
+
+const executeTCP = async (params) => {
   try {
-    //Get randomly one interface with connection.
-    let interfaceSource = topology.getNodeInstanceByStringId(source).interfaces;
-    interfaceSource = interfaceSource.filter((cInterface) => {
-      return cInterface.network !== null;
+    let { delay, message, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: TCPItem,
+      dataList: [],
     });
 
-    if (sEth) {
-      interfaceSource = interfaceSource.find(
-        (e) => e.direction === sEth
+    let REQ_TTL = 64;
+    let RES_TTL = 64;
+
+    let REQ_SEQ = 0;
+    let RES_SEQ = 100;
+
+    let REQ_ACK = 100;
+    let RES_ACK = 0;
+
+    /* THREE WAY HANDSHAKE */
+    await addReqTCP(path, delay, REQ_TTL, REQ_SEQ, REQ_ACK, "SYN");
+    await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "SYN, ACK");
+    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
+
+    /* SEND MSG */
+    if (message.length > 0) {
+      await addReqTCP(
+        path,
+        delay,
+        REQ_TTL,
+        (REQ_SEQ = REQ_SEQ + message.length - 1),
+        REQ_ACK,
+        "ACK",
+        message
       );
-      console.log(sEth);
-    } else {
-      interfaceSource =
-        interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
     }
 
-    let interfaceDestination =
-      topology.getNodeInstanceByStringId(destination).interfaces;
-    interfaceDestination = interfaceDestination.filter((cInterface) => {
-      return cInterface.network !== null;
+    await addResTCP(
+      path,
+      delay,
+      RES_TTL,
+      ++RES_SEQ,
+      (RES_ACK = REQ_SEQ + 1),
+      "ACK"
+    );
+
+    /* THREE WAY FIN */
+    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, REQ_ACK, "FIN");
+    await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "FIN, ACK");
+    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
+  } catch (e) {
+    results.value.pop();
+    addLog("\nFurther details--> " + e, "red");
+  }
+  isExecCommand.value = false;
+};
+const executePing = async (params) => {
+  try {
+    let { delay, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: PingItem,
+      dataList: [],
     });
-
-    if (dEth) {
-      interfaceDestination = interfaceDestination.find(
-        (e) => e.direction === dEth
-      );
-      console.log(dEth);
-    } else {
-      interfaceDestination =
-        interfaceDestination[
-          Math.floor(Math.random() * interfaceDestination.length)
-        ];
-    }
-
-    let path = DFS.findPath(interfaceSource, interfaceDestination);
 
     let REQ_TTL = 64;
     let RES_TTL = 64;
