@@ -162,6 +162,7 @@ const executeCommand = () => {
       rm: executeRemoveNode,
       ping: executePing,
       tcp: executeTCP,
+      udp: executeUDP,
       help: executeHelp,
     };
 
@@ -246,7 +247,8 @@ const getRouting = (params) => {
     destination,
     dEth,
     delay = 0,
-    message = "";
+    message = "",
+    MTU = 0;
   function isFlag(param) {
     return param.includes("-");
   }
@@ -266,6 +268,8 @@ const getRouting = (params) => {
       delay = parseInt(params[i + 1]);
     } else if (params[i] === "-msg" && !isFlag(params[i + 1])) {
       message = params[i + 1];
+    } else if (params[i] === "-mtu" && !isFlag(params[i + 1])) {
+      MTU = params[i + 1];
     }
   }
   //Get randomly one interface with connection.
@@ -302,7 +306,7 @@ const getRouting = (params) => {
 
   let path = DFS.findPath(interfaceSource, interfaceDestination);
 
-  return { delay, message, path };
+  return { delay, message, path, MTU };
 };
 
 const addResult = async (result, delay) => {
@@ -360,9 +364,9 @@ const addReqTCP = async (
 const addResTCP = async (
   path,
   delay,
-  REQ_TTL,
-  REQ_SEQ,
-  REQ_ACK,
+  RES_TTL,
+  RES_SEQ,
+  RES_ACK,
   FLAGS,
   MESSAGE = ""
 ) => {
@@ -376,12 +380,12 @@ const addResTCP = async (
         "_ETH-" +
         path[path.length - 1].direction,
       IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
-      TTL: --REQ_TTL,
+      TTL: --RES_TTL,
       PROTOCOL_IP: "TCP",
       PORT_S: "80",
       PORT_D: "8080",
-      SEQ: REQ_SEQ,
-      ACK: REQ_ACK,
+      SEQ: RES_SEQ,
+      ACK: RES_ACK,
       FLAGS: FLAGS,
       MESSAGE: MESSAGE,
     };
@@ -413,6 +417,8 @@ const executeTCP = async (params) => {
     await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "SYN, ACK");
     await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
 
+    ++RES_SEQ;
+
     /* SEND MSG */
     if (message.length > 0) {
       await addReqTCP(
@@ -424,19 +430,21 @@ const executeTCP = async (params) => {
         "ACK",
         message
       );
+
+      await addResTCP(
+        path,
+        delay,
+        RES_TTL,
+        RES_SEQ,
+        (RES_ACK = REQ_SEQ + 1),
+        "ACK"
+      );
+
+      ++REQ_SEQ;
     }
 
-    await addResTCP(
-      path,
-      delay,
-      RES_TTL,
-      ++RES_SEQ,
-      (RES_ACK = REQ_SEQ + 1),
-      "ACK"
-    );
-
     /* THREE WAY FIN */
-    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, REQ_ACK, "FIN");
+    await addReqTCP(path, delay, REQ_TTL, REQ_SEQ, REQ_ACK, "FIN");
     await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "FIN, ACK");
     await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
   } catch (e) {
@@ -445,9 +453,69 @@ const executeTCP = async (params) => {
   }
   isExecCommand.value = false;
 };
+
+/* udp -s H1 -d H3 -msg 1471 -mtu 1492,576,328 */
+const executeUDP = async (params) => {
+  try {
+    let { delay, message, path, MTU } = getRouting(params);
+
+    MTU = MTU.split(",");
+
+    const MAX_MTU = 1500;
+    const MIN_MTU = 41;
+
+    const UDP_HEADER = 16;
+    const IP_HEADER = 20;
+
+    let previousDatagrams = [parseInt(message)];
+    let currentNetwork = 0;
+
+    for (let j = 0; j < path.length; j += 2) {
+      let MSS = MTU[currentNetwork] - IP_HEADER;
+      let divisibleEight = false;
+      while (!divisibleEight) {
+        if (MSS % 8 === 0) {
+          divisibleEight = true;
+        } else {
+          MSS--;
+        }
+      }
+
+      let currentDatagrams = [];
+      for (let i = 0; i < previousDatagrams.length; i += 1) {
+        if (MSS < previousDatagrams[i]) {
+          const NFRAG = Math.ceil(previousDatagrams[i] / MSS);
+          for (let z = 0; z < NFRAG; z += 1) {
+            if (previousDatagrams[i] - MSS > 0) {
+              previousDatagrams[i] -= MSS;
+              currentDatagrams.push(MSS);
+            } else {
+              currentDatagrams.push(previousDatagrams[i]);
+            }
+          }
+        } else {
+          currentDatagrams.push(previousDatagrams[i]);
+        }
+      }
+      console.log(currentNetwork);
+      console.log(MSS);
+      console.log(parseInt(message));
+      console.log(currentDatagrams);
+      previousDatagrams = currentDatagrams;
+      currentNetwork++;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  const addUDP = () => {
+
+  }
+};
+
 const executePing = async (params) => {
   try {
-    let { delay, path } = getRouting(params);
+    let { delay, message, path } = getRouting(params);
 
     results.value.push({
       command: currentCommand.value,
