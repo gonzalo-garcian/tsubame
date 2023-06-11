@@ -111,6 +111,7 @@ import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
 import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue";
 import router from "@/router";
 import TCPItem from "@/components/sandbox/terminal/results/TCPItem.vue";
+import UDPItem from "@/components/sandbox/terminal/results/UDPItem.vue";
 
 let topology = useTopologyStore();
 
@@ -459,14 +460,27 @@ const executeUDP = async (params) => {
   try {
     let { delay, message, path, MTU } = getRouting(params);
 
+    results.value.push({
+      command: currentCommand.value,
+      type: UDPItem,
+      dataList: [],
+    });
+
     MTU = MTU.split(",");
+
+    if (!(path.length / 2 === MTU.length)) {
+      addLog("Each network needs an MTU", "red");
+      isExecCommand.value = false;
+      return;
+    }
 
     const MAX_MTU = 1500;
     const MIN_MTU = 41;
 
-    const UDP_HEADER = 16;
+    const UDP_HEADER = 16; /* OPTIONS */
     const IP_HEADER = 20;
 
+    let totalDatagrams = [];
     let previousDatagrams = [parseInt(message)];
     let currentNetwork = 0;
 
@@ -483,33 +497,99 @@ const executeUDP = async (params) => {
 
       let currentDatagrams = [];
       for (let i = 0; i < previousDatagrams.length; i += 1) {
+        let BYTES_LEFT = previousDatagrams[i];
         if (MSS < previousDatagrams[i]) {
           const NFRAG = Math.ceil(previousDatagrams[i] / MSS);
           for (let z = 0; z < NFRAG; z += 1) {
-            if (previousDatagrams[i] - MSS > 0) {
-              previousDatagrams[i] -= MSS;
+            if (BYTES_LEFT - MSS > 0) {
+              BYTES_LEFT -= MSS;
               currentDatagrams.push(MSS);
             } else {
-              currentDatagrams.push(previousDatagrams[i]);
+              currentDatagrams.push(BYTES_LEFT);
             }
           }
         } else {
-          currentDatagrams.push(previousDatagrams[i]);
+          currentDatagrams.push(BYTES_LEFT);
         }
       }
-      console.log(currentNetwork);
-      console.log(MSS);
-      console.log(parseInt(message));
-      console.log(currentDatagrams);
+
       previousDatagrams = currentDatagrams;
+      totalDatagrams.push(previousDatagrams);
       currentNetwork++;
     }
+
+    currentNetwork = 0;
+
+    let RES_TTL = 64;
+    for (let j = 0; j < path.length; j += 2) {
+      //addLog("NETWORK " + j, "green");
+      let OFFSET = 0;
+      for (let i = 0; i < totalDatagrams[currentNetwork].length; i += 1) {
+        let BYTES_DATAGRAM = totalDatagrams[currentNetwork][i];
+        const result = {
+          MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+          MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
+          PROTOCOL_N: "IP",
+          IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+          IP_D:
+            path[path.length - 1].father.stringId +
+            "_ETH-" +
+            path[path.length - 1].direction,
+          TTL: RES_TTL,
+          PROTOCOL_IP: "UDP",
+          PORT_S: "2121",
+          PORT_D: "21",
+          IP_ID: 42,
+          OFFSET: OFFSET,
+          MF: totalDatagrams[currentNetwork].length - 1 === i ? 0 : 1,
+          TL: BYTES_DATAGRAM + IP_HEADER,
+          BYTES: BYTES_DATAGRAM,
+        };
+        await addResult(result, delay);
+        OFFSET += BYTES_DATAGRAM;
+      }
+      RES_TTL--;
+      currentNetwork++;
+    }
+
+    /* RES
+    currentNetwork = 0;
+
+    let REQ_TTL = 64;
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      //addLog("NETWORK " + j, "green");
+      let OFFSET = 0;
+      for (let i = 0; i < totalDatagrams[currentNetwork].length; i += 1) {
+        let BYTES_DATAGRAM = totalDatagrams[currentNetwork][i];
+        const result = {
+          MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+          MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+          PROTOCOL_N: "IP",
+          IP_S:
+            path[path.length - 1].father.stringId +
+            "_ETH-" +
+            path[path.length - 1].direction,
+          IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+          TTL: REQ_TTL,
+          PROTOCOL_IP: "UDP",
+          PORT_S: "80",
+          PORT_D: "8080",
+          IP_ID: 42,
+          OFFSET: OFFSET,
+          MF: totalDatagrams[currentNetwork].length - 1 === i ? 0 : 1,
+          TL: BYTES_DATAGRAM + IP_HEADER,
+        };
+        await addResult(result, delay);
+        OFFSET += BYTES_DATAGRAM;
+      }
+      RES_TTL--;
+      currentNetwork++;
+    }*/
+
+    isExecCommand.value = false;
   } catch (e) {
     console.log(e);
-  }
-
-  const addUDP = () => {
-
+    addLog(e, "red");
   }
 };
 
