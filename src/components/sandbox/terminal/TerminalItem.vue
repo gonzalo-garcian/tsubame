@@ -112,6 +112,7 @@ import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue
 import router from "@/router";
 import TCPItem from "@/components/sandbox/terminal/results/TCPItem.vue";
 import UDPItem from "@/components/sandbox/terminal/results/UDPItem.vue";
+import ARPItem from "@/components/sandbox/terminal/results/ARPItem.vue";
 
 let topology = useTopologyStore();
 
@@ -164,6 +165,7 @@ const executeCommand = () => {
       ping: executePing,
       tcp: executeTCP,
       udp: executeUDP,
+      arp: executeARP,
       help: executeHelp,
     };
 
@@ -314,6 +316,58 @@ const addResult = async (result, delay) => {
   await sleep(delay);
   results.value[results.value.length - 1].dataList.push(result);
   nextTick().then(() => scrollTerminalToBottom());
+};
+
+const executeARP = (params) => {
+  try {
+    let { delay, message, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: ARPItem,
+      dataList: [],
+    });
+
+    if (path.length !== 2) {
+      addLog("You need to check your notebooks...", "red");
+      isExecCommand.value = false;
+      return;
+    }
+
+    for (let j = 0; j < path.length; j += 2) {
+      let res = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: "BRCST",
+        PROTOCOL_N: "ARP",
+        OPCODE: "ARP REQUEST",
+        IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+        IP_D:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+      };
+      addResult(res, delay);
+    }
+
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      const result = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+        PROTOCOL_N: "ARP",
+        OPCODE: "ARP RESPONSE",
+        IP_S:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+      };
+      addResult(result, delay);
+    }
+
+    isExecCommand.value = false;
+  } catch (e) {
+    addLog(e, "red");
+  }
 };
 
 const addLog = (text, color) => {
