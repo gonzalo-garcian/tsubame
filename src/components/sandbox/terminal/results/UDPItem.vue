@@ -7,8 +7,8 @@ defineProps(["data"]);
     <tbody>
       <tr>
         <td colspan="3" class="frame">FRAME</td>
-        <td colspan="4" class="datagram">DATAGRAM</td>
-        <td colspan="6" class="segment">SEGMENT</td>
+        <td colspan="7" class="datagram">DATAGRAM</td>
+        <td colspan="3" class="segment">SEGMENT</td>
         <td colspan="1" class="data">DATA</td>
       </tr>
       <tr>
@@ -19,11 +19,11 @@ defineProps(["data"]);
         <td class="attribute">IP DESTINATION</td>
         <td class="attribute">IP ID</td>
         <td class="attribute">TTL</td>
+        <td class="attribute">OFFSET</td>
+        <td class="attribute">MORE FRAGMENTS</td>
         <td class="attribute">PROTOCOL</td>
         <td class="attribute">PORT SOURCE</td>
         <td class="attribute">PORT DESTINATION</td>
-        <td class="attribute">OFFSET</td>
-        <td class="attribute">MORE FRAGMENTS</td>
         <td class="attribute">TOTAL LENGTH</td>
         <td class="attribute">MESSAGE</td>
       </tr>
@@ -35,11 +35,11 @@ defineProps(["data"]);
         <td>{{ data.IP_D }}</td>
         <td>{{ data.IP_ID }}</td>
         <td>{{ data.TTL }}</td>
+        <td>{{ data.OFFSET }}</td>
+        <td>{{ data.MF }}</td>
         <td>{{ data.PROTOCOL_IP }}</td>
         <td>{{ data.PORT_S }}</td>
         <td>{{ data.PORT_D }}</td>
-        <td>{{ data.OFFSET }}</td>
-        <td>{{ data.MF }}</td>
         <td>{{ data.TL }}</td>
         <td>{{ data.BYTES }} RANDOM BYTES OF DATA</td>
       </tr>
