@@ -1,0 +1,732 @@
+<template>
+  <div
+    class="terminal border-l border-t border-r border-purple-400"
+    @click="focusInput"
+    @keydown="handleKeyDown"
+  >
+    <div class="terminal-header bg-[#303030] w-full border-b border-purple-400">
+      <h1 class="text-white text-lg font-mono font-bold p-2">Terminal</h1>
+    </div>
+    <div class="terminal-body bg-[#181818] pt-1 pl-2" ref="terminalBody">
+      <div
+        v-for="(result, index) in results"
+        :key="index"
+        class="terminal-line"
+      >
+        <span class="terminal-prompt">user@terminal:~$</span>
+        <span class="terminal-command">{{ result.command }}</span>
+        <div class="pt-5">
+          <component
+            v-for="(data, index) in result.dataList"
+            :key="index"
+            :is="result.type"
+            :data="data"
+          />
+        </div>
+      </div>
+      <div class="terminal-input-container">
+        <span class="terminal-prompt" v-if="!isExecCommand"
+          >user@terminal:~$</span
+        >
+        <input
+          class="terminal-input"
+          type="text"
+          v-model="currentCommand"
+          @keydown.enter="executeCommand"
+          ref="commandInput"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.terminal {
+  height: 300px;
+  background-color: #303030;
+  color: white;
+  font-family: monospace;
+  grid-area: terminal;
+}
+
+.terminal-header {
+  font-size: 16px;
+  margin: 0;
+}
+
+.terminal-body {
+  height: 250px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.terminal-line {
+  white-space: pre-wrap;
+}
+
+.terminal-prompt {
+  color: #9370db;
+  margin-right: 5px;
+}
+
+.terminal-command {
+  color: #fff;
+}
+
+.terminal-input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  caret-shape: block;
+  width: 50%;
+}
+
+/* Custom scroll bar styles */
+.terminal-body::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Hide the up and down buttons on the scroll bar */
+.terminal-body::-webkit-scrollbar-button {
+  display: none;
+}
+</style>
+
+<script setup>
+import { nextTick, onMounted, ref } from "vue";
+import { DepthFirstSearch } from "@/models/DepthFirstSearch";
+import { useTopologyStore } from "@/stores/useTopology";
+import PingItem from "@/components/sandbox/terminal/results/PingItem.vue";
+import ErrorLogItem from "@/components/sandbox/terminal/results/ErrorLogItem.vue";
+import router from "@/router";
+import TCPItem from "@/components/sandbox/terminal/results/TCPItem.vue";
+import UDPItem from "@/components/sandbox/terminal/results/UDPItem.vue";
+import ARPItem from "@/components/sandbox/terminal/results/ARPItem.vue";
+
+let topology = useTopologyStore();
+
+const currentCommand = ref("");
+const terminalBody = ref(null);
+const commandInput = ref(null);
+const results = ref([]);
+const isExecCommand = ref(false);
+
+let commandRecord = [];
+let commandRecordIndex = 0;
+
+const DFS = new DepthFirstSearch();
+const focusInput = () => {
+  commandInput.value.focus();
+};
+
+const handleKeyDown = (event) => {
+  if (event.ctrlKey && event.key === "l") {
+    event.preventDefault();
+    clearTerminalOutput();
+  }
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (commandRecordIndex > 0) {
+      commandRecordIndex--;
+      currentCommand.value = commandRecord[commandRecordIndex];
+    }
+  }
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    if (commandRecordIndex < commandRecord.length) {
+      commandRecordIndex++;
+      currentCommand.value = commandRecord[commandRecordIndex];
+    }
+  }
+};
+
+const clearTerminalOutput = () => {
+  results.value = [];
+};
+
+const executeCommand = () => {
+  if (currentCommand.value.trim() !== "") {
+    let commands = {
+      exit: executeExit,
+      save: executeSaveProject,
+      clear: executeClear,
+      rm: executeRemoveNode,
+      ping: executePing,
+      tcp: executeTCP,
+      udp: executeUDP,
+      arp: executeARP,
+      help: executeHelp,
+    };
+
+    let mainCommand = currentCommand.value.match(/^\w+/)[0];
+    let commandParams = currentCommand.value.split(" ").slice(1);
+    if (commands[mainCommand]) {
+      isExecCommand.value = true;
+      commands[mainCommand](commandParams);
+    } else {
+      results.value.push({
+        command: currentCommand.value,
+        type: ErrorLogItem,
+        dataList: [
+          {
+            ERROR_LOG: "Command not found",
+          },
+        ],
+      });
+    }
+    commandRecord.push(currentCommand.value);
+    commandRecordIndex = commandRecord.length;
+    currentCommand.value = "";
+    nextTick().then(() => scrollTerminalToBottom());
+  }
+};
+
+const sleep = (delay) => {
+  return new Promise((resolve) => setTimeout(resolve, delay));
+};
+
+const executeExit = async () => {
+  await router.push("/dashboard").then(() => (isExecCommand.value = false));
+};
+
+const executeClear = () => {
+  clearTerminalOutput();
+  isExecCommand.value = false;
+};
+
+const executeSaveProject = () => {
+  useTopologyStore()
+    .saveProject()
+    .then(() => {
+      results.value.push({
+        command: currentCommand.value,
+        type: ErrorLogItem,
+        dataList: [
+          {
+            ERROR_LOG: "Project saved correctly.",
+            COLOR: "text-green",
+          },
+        ],
+      });
+      isExecCommand.value = false;
+    });
+};
+
+const executeRemoveNode = () => {
+  isExecCommand.value = false;
+};
+
+const executeHelp = () => {
+  results.value.push({
+    command: currentCommand.value,
+    type: ErrorLogItem,
+    dataList: [
+      {
+        ERROR_LOG:
+          "ping: Envía un datagrama ICMP de un nodo A a un nodo B\n-s: desde que nodo se envía  " +
+          "\n-d: a que nodo se quiere enviar" +
+          "\n-delay: número en milisegundos que la trama tarda en aparecer",
+        COLOR: "text-red",
+      },
+    ],
+  });
+  isExecCommand.value = false;
+};
+
+const getRouting = (params) => {
+  let source,
+    sEth,
+    destination,
+    dEth,
+    delay = 0,
+    message = "",
+    MTU = 0;
+  function isFlag(param) {
+    return param.includes("-");
+  }
+
+  for (let i = 0; i < params.length; i++) {
+    if (params[i] === "-s" && !isFlag(params[i + 1])) {
+      if (params[i + 2] === "-eth" && !isFlag(params[i + 3])) {
+        sEth = params[i + 3];
+      }
+      source = params[i + 1];
+    } else if (params[i] === "-d" && !isFlag(params[i + 1])) {
+      if (params[i + 2] === "-eth" && !isFlag(params[i + 3])) {
+        dEth = params[i + 3];
+      }
+      destination = params[i + 1];
+    } else if (params[i] === "-delay" && !isFlag(params[i + 1])) {
+      delay = parseInt(params[i + 1]);
+    } else if (params[i] === "-msg" && !isFlag(params[i + 1])) {
+      message = params[i + 1];
+    } else if (params[i] === "-mtu" && !isFlag(params[i + 1])) {
+      MTU = params[i + 1];
+    }
+  }
+  //Get randomly one interface with connection.
+  let interfaceSource = topology.getNodeInstanceByStringId(source).interfaces;
+  interfaceSource = interfaceSource.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+
+  if (sEth) {
+    interfaceSource = interfaceSource.find((e) => e.direction === sEth);
+    console.log(sEth);
+  } else {
+    interfaceSource =
+      interfaceSource[Math.floor(Math.random() * interfaceSource.length)];
+  }
+
+  let interfaceDestination =
+    topology.getNodeInstanceByStringId(destination).interfaces;
+  interfaceDestination = interfaceDestination.filter((cInterface) => {
+    return cInterface.network !== null;
+  });
+
+  if (dEth) {
+    interfaceDestination = interfaceDestination.find(
+      (e) => e.direction === dEth
+    );
+    console.log(dEth);
+  } else {
+    interfaceDestination =
+      interfaceDestination[
+        Math.floor(Math.random() * interfaceDestination.length)
+      ];
+  }
+
+  let path = DFS.findPath(interfaceSource, interfaceDestination);
+
+  return { delay, message, path, MTU };
+};
+
+const addResult = async (result, delay) => {
+  await sleep(delay);
+  results.value[results.value.length - 1].dataList.push(result);
+  nextTick().then(() => scrollTerminalToBottom());
+};
+
+const executeARP = (params) => {
+  try {
+    let { delay, message, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: ARPItem,
+      dataList: [],
+    });
+
+    if (path.length !== 2) {
+      addLog("You need to check your notebooks...", "red");
+      isExecCommand.value = false;
+      return;
+    }
+
+    for (let j = 0; j < path.length; j += 2) {
+      let res = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: "BRCST",
+        PROTOCOL_N: "ARP",
+        OPCODE: "ARP REQUEST",
+        IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+        IP_D:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+      };
+      addResult(res, delay);
+    }
+
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      const result = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+        PROTOCOL_N: "ARP",
+        OPCODE: "ARP RESPONSE",
+        IP_S:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+      };
+      addResult(result, delay);
+    }
+
+    isExecCommand.value = false;
+  } catch (e) {
+    addLog(e, "red");
+  }
+};
+
+const addLog = (text, color) => {
+  results.value.push({
+    command: currentCommand.value,
+    type: ErrorLogItem,
+    dataList: [
+      {
+        ERROR_LOG: text,
+        COLOR: "text-" + color,
+      },
+    ],
+  });
+};
+
+const addReqTCP = async (
+  path,
+  delay,
+  REQ_TTL,
+  REQ_SEQ,
+  REQ_ACK,
+  FLAGS,
+  MESSAGE = ""
+) => {
+  for (let j = 0; j < path.length; j += 2) {
+    const result = {
+      MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+      MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+      IP_D:
+        path[path.length - 1].father.stringId +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      TTL: --REQ_TTL,
+      PROTOCOL_IP: "TCP",
+      PORT_S: "8080",
+      PORT_D: "80",
+      SEQ: REQ_SEQ,
+      ACK: REQ_ACK,
+      FLAGS: FLAGS,
+      MESSAGE: MESSAGE,
+    };
+
+    await addResult(result, delay);
+  }
+};
+
+const addResTCP = async (
+  path,
+  delay,
+  RES_TTL,
+  RES_SEQ,
+  RES_ACK,
+  FLAGS,
+  MESSAGE = ""
+) => {
+  for (let j = path.length - 1; j > 0; j -= 2) {
+    const result = {
+      MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+      MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+      PROTOCOL_N: "IP",
+      IP_S:
+        path[path.length - 1].father.stringId +
+        "_ETH-" +
+        path[path.length - 1].direction,
+      IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+      TTL: --RES_TTL,
+      PROTOCOL_IP: "TCP",
+      PORT_S: "80",
+      PORT_D: "8080",
+      SEQ: RES_SEQ,
+      ACK: RES_ACK,
+      FLAGS: FLAGS,
+      MESSAGE: MESSAGE,
+    };
+    await addResult(result, delay);
+  }
+};
+
+const executeTCP = async (params) => {
+  try {
+    let { delay, message, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: TCPItem,
+      dataList: [],
+    });
+
+    let REQ_TTL = 64;
+    let RES_TTL = 64;
+
+    let REQ_SEQ = 0;
+    let RES_SEQ = 100;
+
+    let REQ_ACK = 100;
+    let RES_ACK = 0;
+
+    /* THREE WAY HANDSHAKE */
+    await addReqTCP(path, delay, REQ_TTL, REQ_SEQ, REQ_ACK, "SYN");
+    await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "SYN, ACK");
+    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
+
+    ++RES_SEQ;
+
+    /* SEND MSG */
+    if (message.length > 0) {
+      await addReqTCP(
+        path,
+        delay,
+        REQ_TTL,
+        (REQ_SEQ = REQ_SEQ + message.length - 1),
+        REQ_ACK,
+        "ACK",
+        message
+      );
+
+      await addResTCP(
+        path,
+        delay,
+        RES_TTL,
+        RES_SEQ,
+        (RES_ACK = REQ_SEQ + 1),
+        "ACK"
+      );
+
+      ++REQ_SEQ;
+    }
+
+    /* THREE WAY FIN */
+    await addReqTCP(path, delay, REQ_TTL, REQ_SEQ, REQ_ACK, "FIN");
+    await addResTCP(path, delay, RES_TTL, RES_SEQ, ++RES_ACK, "FIN, ACK");
+    await addReqTCP(path, delay, REQ_TTL, ++REQ_SEQ, ++REQ_ACK, "ACK");
+  } catch (e) {
+    results.value.pop();
+    addLog("\nFurther details--> " + e, "red");
+  }
+  isExecCommand.value = false;
+};
+
+/* udp -s H1 -d H3 -msg 1471 -mtu 1492,576,328 */
+const executeUDP = async (params) => {
+  try {
+    let { delay, message, path, MTU } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: UDPItem,
+      dataList: [],
+    });
+
+    MTU = MTU.split(",");
+
+    if (!(path.length / 2 === MTU.length)) {
+      addLog("Each network needs an MTU", "red");
+      isExecCommand.value = false;
+      return;
+    }
+
+    const MAX_MTU = 1500;
+    const MIN_MTU = 41;
+
+    const UDP_HEADER = 16; /* OPTIONS */
+    const IP_HEADER = 20;
+
+    let totalDatagrams = [];
+    let previousDatagrams = [parseInt(message)];
+    let currentNetwork = 0;
+
+    for (let j = 0; j < path.length; j += 2) {
+      let MSS = MTU[currentNetwork] - IP_HEADER;
+      let divisibleEight = false;
+      while (!divisibleEight) {
+        if (MSS % 8 === 0) {
+          divisibleEight = true;
+        } else {
+          MSS--;
+        }
+      }
+
+      let currentDatagrams = [];
+      for (let i = 0; i < previousDatagrams.length; i += 1) {
+        let BYTES_LEFT = previousDatagrams[i];
+        if (MSS < previousDatagrams[i]) {
+          const NFRAG = Math.ceil(previousDatagrams[i] / MSS);
+          for (let z = 0; z < NFRAG; z += 1) {
+            if (BYTES_LEFT - MSS > 0) {
+              BYTES_LEFT -= MSS;
+              currentDatagrams.push(MSS);
+            } else {
+              currentDatagrams.push(BYTES_LEFT);
+            }
+          }
+        } else {
+          currentDatagrams.push(BYTES_LEFT);
+        }
+      }
+
+      previousDatagrams = currentDatagrams;
+      totalDatagrams.push(previousDatagrams);
+      currentNetwork++;
+    }
+
+    currentNetwork = 0;
+
+    let RES_TTL = 64;
+    for (let j = 0; j < path.length; j += 2) {
+      //addLog("NETWORK " + j, "green");
+      let OFFSET = 0;
+      for (let i = 0; i < totalDatagrams[currentNetwork].length; i += 1) {
+        let BYTES_DATAGRAM = totalDatagrams[currentNetwork][i];
+        const result = {
+          MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+          MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
+          PROTOCOL_N: "IP",
+          IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+          IP_D:
+            path[path.length - 1].father.stringId +
+            "_ETH-" +
+            path[path.length - 1].direction,
+          TTL: RES_TTL,
+          PROTOCOL_IP: "UDP",
+          PORT_S: "2121",
+          PORT_D: "21",
+          IP_ID: 42,
+          OFFSET: OFFSET,
+          MF: totalDatagrams[currentNetwork].length - 1 === i ? 0 : 1,
+          TL: BYTES_DATAGRAM + IP_HEADER,
+          BYTES: BYTES_DATAGRAM,
+        };
+        await addResult(result, delay);
+        OFFSET += BYTES_DATAGRAM;
+      }
+      RES_TTL--;
+      currentNetwork++;
+    }
+
+    /* RES
+    currentNetwork = 0;
+
+    let REQ_TTL = 64;
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      //addLog("NETWORK " + j, "green");
+      let OFFSET = 0;
+      for (let i = 0; i < totalDatagrams[currentNetwork].length; i += 1) {
+        let BYTES_DATAGRAM = totalDatagrams[currentNetwork][i];
+        const result = {
+          MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+          MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+          PROTOCOL_N: "IP",
+          IP_S:
+            path[path.length - 1].father.stringId +
+            "_ETH-" +
+            path[path.length - 1].direction,
+          IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+          TTL: REQ_TTL,
+          PROTOCOL_IP: "UDP",
+          PORT_S: "80",
+          PORT_D: "8080",
+          IP_ID: 42,
+          OFFSET: OFFSET,
+          MF: totalDatagrams[currentNetwork].length - 1 === i ? 0 : 1,
+          TL: BYTES_DATAGRAM + IP_HEADER,
+        };
+        await addResult(result, delay);
+        OFFSET += BYTES_DATAGRAM;
+      }
+      RES_TTL--;
+      currentNetwork++;
+    }*/
+
+    isExecCommand.value = false;
+  } catch (e) {
+    console.log(e);
+    addLog(e, "red");
+  }
+};
+
+const executePing = async (params) => {
+  try {
+    let { delay, message, path } = getRouting(params);
+
+    results.value.push({
+      command: currentCommand.value,
+      type: PingItem,
+      dataList: [],
+    });
+
+    let REQ_TTL = 64;
+    let RES_TTL = 64;
+
+    //Sent datagrams.
+    for (let j = 0; j < path.length; j += 2) {
+      let res = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j + 1].father.stringId + "_ETH-" + path[j + 1].direction,
+        PROTOCOL_N: "IP",
+        IP_S: path[0].father.stringId + "_ETH-" + path[0].direction,
+        IP_D:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        TTL: --REQ_TTL,
+        PROTOCOL_IP: "ICMP (1)",
+        MSG_TYPE: "Echo Request (8)",
+        CODE: "Network unreachable (0)",
+      };
+
+      await sleep(delay);
+      results.value[results.value.length - 1].dataList.push(res);
+      nextTick().then(() => scrollTerminalToBottom());
+    }
+
+    for (let j = path.length - 1; j > 0; j -= 2) {
+      let res = {
+        MAC_S: path[j].father.stringId + "_ETH-" + path[j].direction,
+        MAC_D: path[j - 1].father.stringId + "_ETH-" + path[j - 1].direction,
+        PROTOCOL_N: "IP",
+        IP_S:
+          path[path.length - 1].father.stringId +
+          "_ETH-" +
+          path[path.length - 1].direction,
+        IP_D: path[0].father.stringId + "_ETH-" + path[0].direction,
+        TTL: --RES_TTL,
+        PROTOCOL_IP: "ICMP (1)",
+        MSG_TYPE: "Echo Reply (0)",
+        CODE: "Network unreachable (0)",
+      };
+
+      await sleep(delay);
+      results.value[results.value.length - 1].dataList.push(res);
+      nextTick().then(() => scrollTerminalToBottom());
+    }
+  } catch (e) {
+    results.value.pop();
+    results.value.push({
+      command: currentCommand.value,
+      type: ErrorLogItem,
+      dataList: [
+        {
+          ERROR_LOG:
+            "To use ping properly, make sure you're using a valid node and valid flags\nExample: ping -s H1 -d H2 -delay 2000\nFurther details--> " +
+            e +
+            "\n You need to take into account the fact that the command ping uses a random eth (source and destination) from the host node selected, so \n" +
+            "in some cases the command could fail because there is no path between the selected interfaces.",
+          COLOR: "text-red",
+        },
+      ],
+    });
+  }
+  isExecCommand.value = false;
+};
+
+const scrollTerminalToBottom = () => {
+  terminalBody.value.scrollTop = terminalBody.value.scrollHeight;
+};
+
+onMounted(() => {
+  scrollTerminalToBottom();
+});
+</script>

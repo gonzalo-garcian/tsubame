@@ -1,0 +1,88 @@
+    let n1 = new Network();
+    let h1 = new NetworkNode("host");
+    let ni1 = new Interface(n1, h1);
+    h1.addInterface(ni1);
+    n1.addNodeInterface(ni1);
+    let r2 = new NetworkNode("router");
+    let r2i1 = new Interface(n1, r2);
+    r2.addInterface(r2i1);
+    n1.addNodeInterface(r2i1);
+    let r1 = new NetworkNode("router");
+    let ri1 = new Interface(n1, r1);
+    r1.addInterface(ri1);
+    n1.addNodeInterface(ri1);
+    let n2 = new Network();
+    let ri2 = new Interface(n2, r1);
+    r1.addInterface(ri2);
+    n2.addNodeInterface(ri2);
+    let h2 = new NetworkNode("host");
+    let hi2 = new Interface(n2, h2);
+    h2.addInterface(hi2);
+    n2.addNodeInterface(hi2);
+
+
+    // Crear el cuadrado
+        var rect = new Konva.Rect({
+          x: x,
+          y: y,
+          width: 200,
+          height: 200,
+          fill: "blue",
+          name: "rect",
+          draggable: true,
+        });
+        layer.add(rect);
+
+        // Crear los círculos alrededor del cuadrado
+        var circle = new Konva.Circle({
+          x: rect.x() + rect.width() + 20,
+          y: rect.y() + rect.height() / 2,
+          radius: 10,
+          fill: "red",
+        });
+        layer.add(circle);
+
+        /*var circle2 = new Konva.Circle({
+          x: rect.x() + rect.width() / 2,
+          y: rect.y() - 20,
+          radius: 10,
+          fill: "red",
+        });
+        layer.add(circle2);
+
+        var circle3 = new Konva.Circle({
+          x: rect.x() - 20,
+          y: rect.y() + rect.height() / 2,
+          radius: 10,
+          fill: "red",
+        });
+        layer.add(circle3);
+    */
+        function recalculateAnchorPosition() {
+          var squarePos = rect.getAbsolutePosition();
+          var circleX =
+            squarePos.x + rect.width() * rect.scaleX() + ANCHOR_OFFSET * rect.scaleX();
+          var circleY = squarePos.y + (rect.height() * rect.scaleY()) / 2;
+
+          circle.position({
+            x: circleX,
+            y: circleY,
+          });
+        }
+
+        // Actualizar el tamaño de los círculos al cambiar el tamaño del cuadrado
+        rect.on("transform", function () {
+          var scaleX = rect.scaleX();
+
+          circle.radius(Math.abs(10 * scaleX));
+
+          recalculateAnchorPosition();
+
+          layer.batchDraw();
+        });
+
+        // Actualizar la posición de los círculos cuando se mueve el cuadrado
+        rect.on("dragmove", function () {
+          recalculateAnchorPosition();
+          layer.batchDraw();
+        });
