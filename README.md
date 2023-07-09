@@ -1,6 +1,6 @@
-# tsubame
+# Tsubame
 
-This template should help get you started developing with Vue 3 in Vite.
+Rapidly build and test network topologies without ever leaving your browser. A clean and safe environment to learn the basis of networking.
 
 ## Recommended IDE Setup
 
