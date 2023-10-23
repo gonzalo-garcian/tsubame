@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.32.0",
     "firebase": "^10.1.0",
     "konva": "^9.2.0",
+    "nvm": "^0.0.4",
     "pinia": "^2.1.6",
     "uuid": "^9.0.0",
     "vue": "^3.3.4",

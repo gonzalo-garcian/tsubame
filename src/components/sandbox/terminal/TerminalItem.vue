@@ -297,7 +297,7 @@ const getRouting = (params) => {
 
   if (dEth) {
     interfaceDestination = interfaceDestination.find(
-      (e) => e.direction === dEth
+      (e) => e.direction === dEth,
     );
     console.log(dEth);
   } else {
@@ -390,7 +390,7 @@ const addReqTCP = async (
   REQ_SEQ,
   REQ_ACK,
   FLAGS,
-  MESSAGE = ""
+  MESSAGE = "",
 ) => {
   for (let j = 0; j < path.length; j += 2) {
     const result = {
@@ -423,7 +423,7 @@ const addResTCP = async (
   RES_SEQ,
   RES_ACK,
   FLAGS,
-  MESSAGE = ""
+  MESSAGE = "",
 ) => {
   for (let j = path.length - 1; j > 0; j -= 2) {
     const result = {
@@ -483,7 +483,7 @@ const executeTCP = async (params) => {
         (REQ_SEQ = REQ_SEQ + message.length - 1),
         REQ_ACK,
         "ACK",
-        message
+        message,
       );
 
       await addResTCP(
@@ -492,7 +492,7 @@ const executeTCP = async (params) => {
         RES_TTL,
         RES_SEQ,
         (RES_ACK = REQ_SEQ + 1),
-        "ACK"
+        "ACK",
       );
 
       ++REQ_SEQ;

@@ -42,7 +42,7 @@ import { RouterLink } from "vue-router";
     <div class="relative mt-20">
       <div class="container flex flex-row items-center justify-center">
         <div class="flex flex-1 justify-center z-10 mb-10">
-          <img class="w-5/6 h-5/6" src="https://imgur.com/LkRcUAM.gif" alt="" />
+          <img class="w-5/6 h-5/6" src="https://i.imgur.com/07Bi9h4.gif" alt="" />
         </div>
         <div class="flex flex-1 flex-col items-center">
           <h1 class="text-3xl text-white font-bold">Drag and drop nodes</h1>
@@ -63,7 +63,7 @@ import { RouterLink } from "vue-router";
           </p>
         </div>
         <div class="flex flex-1 justify-center z-10 mb-10">
-          <img class="w-5/6 h-5/6" src="https://imgur.com/LkRcUAM.gif" alt="" />
+          <img class="w-5/6 h-5/6" src="https://i.imgur.com/fTARdaR.gif" alt="" />
         </div>
       </div>
     </div>
