@@ -34,7 +34,7 @@
     "eslint-plugin-cypress": "^2.14.0",
     "eslint-plugin-vue": "^9.33.0",
     "jsdom": "^22.1.0",
-    "postcss": "^8.4.27",
+    "postcss": "^8.5.15",
     "prettier": "^3.0.1",
     "start-server-and-test": "^2.0.3",
     "tailwindcss": "^3.3.3",
