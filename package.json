@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.32.0",
-    "firebase": "^10.14.1",
+    "firebase": "^12.17.1",
     "konva": "^9.2.0",
     "nvm": "^0.0.4",
     "pinia": "^2.1.6",
